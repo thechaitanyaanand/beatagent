@@ -260,26 +260,31 @@ def _carry(grid, pieces, sr, new_len):
         p.append(grid.pos[m])
         o.append(grid.origin[m])
         off += e - s
+    if not t:
+        return Grid(np.empty(0), np.empty(0, int), grid.bpb, new_len / sr, grid.time_signature,
+                    grid.confidence, np.empty(0, int), dict(grid.meta))
     return Grid(np.concatenate(t), np.concatenate(p), grid.bpb, new_len / sr, grid.time_signature,
                 grid.confidence, np.concatenate(o), dict(grid.meta))
 
 
 def execute(audio, sr, grid, op, a, b, p=None):
     """Apply one op to slots [a, b) (and target slot p). Returns (audio, grid, echo line)."""
-    S = lambda slot: int(round(_t(grid, slot) * sr))  # noqa: E731
-    A, B, Ln = S(a), S(b), len(audio)
+    Ln = len(audio)
+    S = lambda slot: Ln if slot >= len(grid.times) else int(round(_t(grid, slot) * sr))  # noqa: E731
+    A, B = S(a), S(b)
     what = describe(grid, a, b)
 
     if op.op in ("fade", "gain"):
         out = audio.copy()
         g = np.ones(Ln, np.float32)
         if op.op == "gain":
-            r = max(1, min(int(0.005 * sr), (B - A) // 2))
-            g[A:B] = 10 ** (op.db / 20)
-            if A > 0:
-                g[A:A + r] = np.linspace(1, g[A], r)
-            if B < Ln:
-                g[B - r:B] = np.linspace(g[A], 1, r)
+            val = 10 ** (op.db / 20)
+            r = min(int(0.005 * sr), max(0, (B - A) // 2))
+            g[A:B] = val
+            if A > 0 and r > 0:
+                g[A:A + r] = np.linspace(1, val, r)
+            if B < Ln and r > 0:
+                g[B - r:B] = np.linspace(val, 1, r)
             line = f"Gain {op.db:+.1f} dB on {what}."
         elif op.direction == "out":
             g[A:B] = np.cos(np.linspace(0, np.pi / 2, B - A))
@@ -323,7 +328,7 @@ class Session:
         self.path = path
         self.audio, self.sr, self.info = load(path)
         self.grid0 = grid or analyze(audio=self.audio, sr=self.sr)
-        self.turns, self.ptr = [], 0
+        self.turns, self.echoes, self.ptr = [], [], 0
         self.cur = (self.audio, self.grid0)
 
     @property

@@ -175,3 +175,13 @@ Numbers quoted are from the run at that moment; final numbers are in `evals/resu
   was still overloaded and Pro still over quota, so Flash-Lite stays the default.
 - **Route bug**: a catch-all `/api/{action}/{sid}` swallowed `/api/recreate`; undo/redo are explicit
   routes now. Found by the headless UI smoke test.
+
+## Final line-by-line review & hardening
+- **Mid-track `Gain` edge-ramp bug**: `g[A:A + r] = np.linspace(1, g[A], r)` overwrote `g[A]` to `1.0`
+  before the tail ramp read `g[A]`, flattening the end fade. Fixed and covered in `tests/test_edits.py`.
+- **Edge-case guards**: `grid.analyze` now returns an empty grid cleanly if zero beats are detected;
+  `edits._carry` handles edits that leave zero beats; `sync.stretch` uses `TemporaryDirectory` so temp
+  WAVs don't accumulate; `agent._env` reads `BEAT_AGENT_MODEL` from `.env` outside Docker too; and
+  `index.html` resets the recreation panel when loading a new track and preserves playhead on click-toggle.
+- **Dockerfile fix**: install `torchaudio` alongside `torch` from the CPU wheel index and pre-warm
+  `Audio2Beats` to match `grid.py` (still unbuilt locally because the Docker daemon is not running).

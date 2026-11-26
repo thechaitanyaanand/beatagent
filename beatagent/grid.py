@@ -144,6 +144,9 @@ def analyze(path=None, audio=None, sr=None):
     mono = audio.mean(axis=1)
     beats, downs = _tracker()(mono, sr)
     beats = np.asarray(beats, float)
+    if not len(beats):
+        return Grid([], [], 4, len(mono) / sr, "4/4", 0.0,
+                    meta={"source": str(path) if path else None, "sample_rate": sr})
     env = onset_envelope(mono, sr)
     env_t = np.arange(len(env)) * HOP / AR
 

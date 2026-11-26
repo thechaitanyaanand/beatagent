@@ -18,8 +18,23 @@ from pydantic import TypeAdapter, ValidationError
 from .edits import EditError, Op
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL = os.environ.get("BEAT_AGENT_MODEL", "gemini-3.5-flash-lite")  # full Flash was 503-overloaded on our key
-CACHE = os.environ.get("BEAT_AGENT_CACHE")  # JSON file: replay identical prompts with no API call
+
+
+def _env():
+    """Env vars win over .env; .env names may use '-' instead of '_'."""
+    out = {k.replace("-", "_").upper(): v for k, v in os.environ.items() if v}
+    env = ROOT / ".env"
+    if env.exists():
+        for line in env.read_text().splitlines():
+            name, _, val = line.partition("=")
+            name = name.strip().replace("-", "_").upper()
+            if name and val.strip():
+                out.setdefault(name, val.strip().strip("'\""))
+    return out
+
+
+MODEL = _env().get("BEAT_AGENT_MODEL", "gemini-3.5-flash-lite")  # full Flash was 503-overloaded on our key
+CACHE = _env().get("BEAT_AGENT_CACHE")  # JSON file: replay identical prompts with no API call
 
 SYSTEM = """You turn one chat message about an audio track into edit operations on its beat grid.
 You only interpret. Code resolves beats/bars to exact times, validates ranges and edits the audio.
@@ -96,18 +111,9 @@ class LLMError(RuntimeError):
 
 
 def api_key():
-    """GEMINI_API_KEY_PRO (paid tier) if present, else GEMINI_API_KEY. Env vars win over .env;
-    .env names may use '-' instead of '_' (the provided file does)."""
-    names = ("GEMINI_API_KEY", "GEMINI_API_KEY_PRO")
-    found = {k.replace("-", "_").upper(): v for k, v in os.environ.items() if k.replace("-", "_").upper() in names and v}
-    env = ROOT / ".env"
-    if env.exists():
-        for line in env.read_text().splitlines():
-            name, _, val = line.partition("=")
-            name = name.strip().replace("-", "_").upper()
-            if name in names and val.strip():
-                found.setdefault(name, val.strip().strip("'\""))
-    return found.get("GEMINI_API_KEY_PRO") or found.get("GEMINI_API_KEY")
+    """GEMINI_API_KEY_PRO (paid tier) if present, else GEMINI_API_KEY."""
+    env = _env()
+    return env.get("GEMINI_API_KEY_PRO") or env.get("GEMINI_API_KEY")
 
 
 def call_llm(system, prompt, schema=None):
@@ -256,6 +262,8 @@ def missed_ranges(text, ops):
         if r.anchor == "absolute" and r.start is not None:
             e = r.end if r.end is not None else r.start
             have.add((r.start, e))
+        elif r.anchor == "first" and r.count is not None:
+            have.add((1 if r.unit == "bar" else 0, r.count))
     return [(int(a), int(b)) for a, b in RANGE_RE.findall(text) if (int(a), int(b)) not in have]
 
 

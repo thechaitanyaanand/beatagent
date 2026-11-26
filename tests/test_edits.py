@@ -101,3 +101,22 @@ def test_export_keeps_rate_and_depth(session, tmp_path):
     info = sf.info(path)
     assert (info.samplerate, info.subtype) == (SR, "PCM_24")
     assert grid_json["n_beats"] == BARS * 4
+
+
+def test_mid_track_gain_ramps_both_edges(session):
+    session.apply([Gain(op="gain", range=Range(unit="bar", start=3, end=5), db=-12)])
+    a, g = session.cur
+    start_s = int(round(g.times[8] * SR))
+    end_s = int(round(g.times[20] * SR))
+    # 5 ms ramps at both edges mean no sample-to-sample step jump (unfixed tail bug spiked ~0.18 at end_s - r)
+    assert np.abs(np.diff(a[start_s - 50:start_s + 250, 0])).max() < 0.02
+    assert np.abs(np.diff(a[end_s - 300:end_s - 50, 0])).max() < 0.015
+    # steady middle between beats 8 and 9 is attenuated to ~0.25x original 0.3 amplitude
+    assert np.abs(a[start_s + 1000:start_s + 4000, 0]).max() < 0.08
+
+
+def test_removing_all_beats_leaves_empty_grid_without_crashing(session):
+    session.apply([Remove(op="remove", range=Range(unit="beat", start=0, end=BARS * 4))])
+    a, g = session.cur
+    assert len(a) > 0  # 0.25 s lead-in survives
+    assert len(g.times) == 0 and g.n_bars == 0

@@ -57,12 +57,13 @@ def local_tempo(grid, t0, t1):
 
 
 def stretch(path, ratio, sr):
-    out = Path(tempfile.mkdtemp()) / "stretched.wav"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(path), "-af",
-                    # window=short: default window smeared every other kick by ~25 ms (measured)
-                    f"rubberband=tempo={ratio:.8f}:transients=crisp:detector=percussive:window=short",
-                    "-ar", str(sr), "-c:a", "pcm_f32le", str(out)], check=True)
-    return load(out)[0]
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "stretched.wav"
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(path), "-af",
+                        # window=short: default window smeared every other kick by ~25 ms (measured)
+                        f"rubberband=tempo={ratio:.8f}:transients=crisp:detector=percussive:window=short",
+                        "-ar", str(sr), "-c:a", "pcm_f32le", str(out)], check=True)
+        return load(out)[0]
 
 
 def beatmatch(a_path, b_path, out_dir, start_bar=33, seconds=60.0, grid_a=None, grid_b=None):
@@ -73,8 +74,11 @@ def beatmatch(a_path, b_path, out_dir, start_bar=33, seconds=60.0, grid_a=None, 
     starts = ga.times[(ga.bars == start_bar) & (ga.pos == 1)]
     if not len(starts):
         raise ValueError(f"track A has bars 1-{ga.n_bars}; bar {start_bar} does not exist")
+    b_downs = gb.times[gb.pos == 1]
+    if not len(b_downs):
+        raise ValueError("track B has no detected downbeats to align")
     tA = float(starts[0])
-    tB = float(gb.times[gb.pos == 1][0])  # B enters from its own bar 1
+    tB = float(b_downs[0])  # B enters from its own bar 1
     bpm_a = local_tempo(ga, tA, tA + seconds)
     bpm_b = local_tempo(gb, tB, tB + seconds)
     ratio = bpm_a / bpm_b

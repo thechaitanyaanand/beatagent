@@ -247,7 +247,10 @@ def main():
     ap.add_argument("--part", type=int, choices=[1, 2, 3])
     a = ap.parse_args()
     if not clip("A1"):
-        from make_clips import main as make
+        try:
+            from make_clips import main as make
+        except ImportError:
+            from evals.make_clips import main as make
         make()
     OUT.mkdir(parents=True, exist_ok=True)
     p1, grids, sync, p2, p3 = [], {}, None, [], []
