@@ -1,0 +1,17 @@
+numpy>=2.0
+scipy>=1.13
+librosa>=0.11
+soundfile>=0.13
+mir_eval>=0.8
+pretty_midi>=0.2.10
+torch>=2.3
+beat_this @ https://github.com/CPJKU/beat_this/archive/main.zip
+pydantic>=2.7
+fastapi>=0.115
+uvicorn>=0.30
+python-multipart>=0.0.9
+playwright>=1.45
+onnxruntime>=1.18
+resampy>=0.4
+scikit-learn>=1.4
+# basic-pitch pins old numpy/tensorflow; installed with --no-deps (see Dockerfile / README)

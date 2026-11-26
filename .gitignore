@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+# generated audio: rebuilt by `python run.py evals`
+evals/testpack/
+evals/out/**/*.wav
+evals/out/**/*.flac
+evals/out/**/*.mp3
+sessions/
+*.pdf
