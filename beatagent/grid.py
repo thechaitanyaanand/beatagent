@@ -8,8 +8,8 @@ trustworthy:
   4. derive bar positions and time signature from detected downbeats.
 
 Conventions (also written into every grid JSON):
-  - beat numbers are 1-based; beat 1 is the first downbeat. Pickup beats before
-    it are numbered 0, -1, ... and belong to bar 0.
+  - beat numbers are 0-based: beat 0 is the first downbeat, so in 4/4 beat 16 is the
+    first beat of bar 5. Pickup beats before it are -1, -2, ... and belong to bar 0.
   - bar numbers are 1-based; pos is 1..beats_per_bar.
   - times are seconds from the start of the file.
 """
@@ -28,7 +28,7 @@ SNAP = 0.035     # search window for the onset under a beat
 ONSET_BIAS = 0.005  # calibration knob: onset-strength peaks land ~5 ms after the true attack
                     # (measured on clips with known onsets; re-measure on real annotations)
 
-CONVENTIONS = ("beat numbers 1-based, beat 1 = first downbeat, pickup beats <= 0 in bar 0; "
+CONVENTIONS = ("beat numbers 0-based, beat 0 = first downbeat (4/4: beat 16 = bar 5.1), pickup beats < 0 in bar 0; "
                "bars 1-based; pos 1..beats_per_bar; times in seconds from file start; "
                "beat ranges are half-open (beats 16-32 = start of 16 to start of 32), bar ranges inclusive")
 
@@ -57,9 +57,9 @@ class Grid:
 
     @property
     def numbers(self):
-        """1-based beat number per beat; beat 1 = first downbeat."""
+        """0-based beat number per beat; beat 0 = first downbeat."""
         first = int(np.argmax(self.pos == 1)) if (self.pos == 1).any() else 0
-        return np.arange(len(self.times)) - first + 1
+        return np.arange(len(self.times)) - first
 
     @property
     def n_bars(self):

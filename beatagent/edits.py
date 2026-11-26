@@ -122,9 +122,9 @@ def resolve(grid, r: Range):
         if c > n:
             raise EditError(f"The track only has {n} beats.")
         if r.anchor == "first":
-            a = int(np.flatnonzero(nums == 1)[0]) if (nums == 1).any() else 0
+            a = int(np.flatnonzero(nums == 0)[0]) if (nums == 0).any() else 0
             if a + c > n:
-                raise EditError(f"There are only {n - a} beats from beat 1.")
+                raise EditError(f"There are only {n - a} beats from beat 0.")
             return a, a + c
         if r.anchor == "last":
             return n - c, n
@@ -201,7 +201,7 @@ def bar_beat(grid, slot):
         return "end of track"
     if slot < 0:
         return "start of file"
-    return f"bar {grid.bars[slot]} beat {grid.pos[slot]}"
+    return f"bar {grid.bars[slot]}.{grid.pos[slot]}"
 
 
 def describe(grid, a, b):

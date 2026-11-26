@@ -35,7 +35,7 @@ def test_remove_bar_moves_grid_with_audio(session):
     a, g = session.cur
     assert len(a) == len(session.audio) - 2 * SR
     assert len(g.times) == BARS * 4 - 4 and g.n_bars == BARS - 1
-    assert "bar 2 beat 1 → bar 3 beat 1" in lines[0]
+    assert "bar 2.1 → bar 3.1" in lines[0]
 
 
 def test_repeat_and_grid_matches_audio(session):
@@ -50,11 +50,11 @@ def test_repeat_and_grid_matches_audio(session):
 def test_splices_do_not_click(session):
     session.apply([Remove(op="remove", range=Range(unit="beat", start=3, end=6))])
     a, _ = session.cur
-    # the tone's phase jumps at the cut (1.25 s -> 2.75 s); a hard cut would spike here.
-    # Compare with the same moment in the original, where beat 6 starts with no cut.
+    # beats 3-6 (0-based) = 1.75 s -> 3.25 s; the tone's phase jumps at the cut, so a hard
+    # cut would spike here. Compare with the same moment in the original, where there is no cut.
     d2 = lambda x, i: np.abs(np.diff(x[i - 400:i + 3, 0], 2)).max()  # noqa: E731
-    edited = d2(a, int(round(1.25 * SR)))
-    original = d2(session.audio, int(round(2.75 * SR)))
+    edited = d2(a, int(round(1.75 * SR)))
+    original = d2(session.audio, int(round(3.25 * SR)))
     assert edited < 1.5 * original
 
 

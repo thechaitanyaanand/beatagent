@@ -47,12 +47,13 @@ def band_env(y, sr, lo, hi, hop):
 
 
 def drums(perc, sr, spb):
-    """Peaks per band on the percussive layer: low = kick, mid = snare, high (no snare there) = hat.
+    """Peaks per band on the percussive layer: low = kick, 150-1000 Hz = snare body, high (no snare there) = hat.
+    (300-3000 Hz let hat noise in as false snares: P2 snare F 0.28.)
     Bands are peak-picked separately so a quiet hat isn't lost under the onset list of a loud kick."""
     from scipy.signal import find_peaks
     hop = 128
     gap = int(0.06 * sr / hop)
-    low, mid, high = (band_env(perc, sr, lo, hi, hop) for lo, hi in ((0, 150), (300, 3000), (6000, sr / 2)))
+    low, mid, high = (band_env(perc, sr, lo, hi, hop) for lo, hi in ((0, 150), (150, 1000), (6000, sr / 2)))
     hits = {}
     for pitch, env in ((KICK, low), (SNARE, mid)):
         pk, pr = find_peaks(env, height=0.25, distance=gap)

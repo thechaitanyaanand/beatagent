@@ -25,7 +25,8 @@ SYSTEM = """You turn one chat message about an audio track into edit operations 
 You only interpret. Code resolves beats/bars to exact times, validates ranges and edits the audio.
 
 Grid conventions (the user sees these too):
-- Beats are numbered from 1; beat 1 is the first downbeat. Bars are numbered from 1.
+- Beats are numbered from 0; beat 0 is the first downbeat (in 4/4, beat 16 = first beat of bar 5).
+  Bars are numbered from 1. So "beat 0 to beat 8" = start 0, end 8 = bars 1-2.
 - Beat ranges are half-open positions: "beats 16-32" = start of beat 16 to start of beat 32 (16 beats) -> start=16, end=32.
 - Bar ranges are inclusive: "bars 5-8" -> start=5, end=8. "bar 5" -> start=5, end=5.
 - "first N beats/bars" -> anchor=first, count=N. "last N ..." -> anchor=last, count=N (includes the tail).
@@ -43,8 +44,6 @@ Operations:
 Readings we have decided (say which one you used in "reading"):
 - "repeat it twice" / "play it twice" = total_plays 2. "loop it four times" = total_plays 4.
 - A standalone "cut X" means remove X. "cut X and repeat/loop it" means take X and repeat it in place.
-- If the user numbers from 0 ("beat 0 to beat 8"), they count from zero: beat 0 is our beat 1, so
-  "beat 0 to beat 8" = start 1, end 9 (the first 8 beats). Say so.
 - "undo" / "redo" -> action undo / redo.
 
 When to not edit:
@@ -59,7 +58,8 @@ Examples (range objects):
 - "remove bar 5" -> remove, {unit: bar, anchor: absolute, start: 5, end: 5, count: null}
 - "fade out the last 8 beats" -> fade out, {unit: beat, anchor: last, start: null, end: null, count: 8}
 
-Output JSON only. "reading" = one plain sentence restating what you will do, in beats/bars.
+Output JSON only. "reading" = one plain sentence restating what you will do, using only the
+numbers the user said (never compute bar or beat numbers yourself: code adds the exact ones).
 "message" = what to tell the user for clarify/reject (empty for edits)."""
 
 RANGE = {"type": "object", "properties": {
@@ -96,18 +96,21 @@ class LLMError(RuntimeError):
 
 
 def api_key():
-    if os.environ.get("GEMINI_API_KEY"):
-        return os.environ["GEMINI_API_KEY"]
+    """GEMINI_API_KEY_PRO (paid tier) if present, else GEMINI_API_KEY. Env vars win over .env;
+    .env names may use '-' instead of '_' (the provided file does)."""
+    names = ("GEMINI_API_KEY", "GEMINI_API_KEY_PRO")
+    found = {k.replace("-", "_").upper(): v for k, v in os.environ.items() if k.replace("-", "_").upper() in names and v}
     env = ROOT / ".env"
     if env.exists():
         for line in env.read_text().splitlines():
             name, _, val = line.partition("=")
-            if name.strip().replace("-", "_").upper() == "GEMINI_API_KEY":
-                return val.strip().strip("'\"")
-    return None
+            name = name.strip().replace("-", "_").upper()
+            if name in names and val.strip():
+                found.setdefault(name, val.strip().strip("'\""))
+    return found.get("GEMINI_API_KEY_PRO") or found.get("GEMINI_API_KEY")
 
 
-def call_llm(system, prompt):
+def call_llm(system, prompt, schema=None):
     key = hashlib.sha256(f"{MODEL}\n{system}\n{prompt}".encode()).hexdigest()[:16]
     cache = json.loads(Path(CACHE).read_text()) if CACHE and Path(CACHE).exists() else {}
     if key in cache:
@@ -117,7 +120,7 @@ def call_llm(system, prompt):
         raise LLMError("no GEMINI_API_KEY set (see .env.example)")
     body = {"systemInstruction": {"parts": [{"text": system}]},
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "responseSchema": SCHEMA}}
+            "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "responseSchema": schema or SCHEMA}}
     req = urllib.request.Request(
         f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent",
         data=json.dumps(body).encode(), headers={"Content-Type": "application/json", "x-goog-api-key": k})
@@ -246,11 +249,66 @@ RANGE_RE = re.compile(r"(\d+)\s*(?:-|–|—|to|through|thru|until)\s*(\d+)")
 
 
 def missed_ranges(text, ops):
-    """Ranges written as "X-Y" in the message that no op uses (zero-based X-1..Y-1 also counts)."""
+    """Ranges written as "X-Y" in the message that no op uses."""
     have = set()
     for o in ops:
         r = o.range
         if r.anchor == "absolute" and r.start is not None:
             e = r.end if r.end is not None else r.start
-            have |= {(r.start, e), (r.start - 1, e - 1)}
+            have.add((r.start, e))
     return [(int(a), int(b)) for a, b in RANGE_RE.findall(text) if (int(a), int(b)) not in have]
+
+
+# ---------- chat changes to a recreation (score), same pattern: LLM proposes, code applies ----------
+
+SCORE_SYSTEM = """You turn one chat message about a synthesized loop into changes to its score.
+Tracks are listed in the prompt. You can: set tempo (BPM); per track: mute/unmute, gain in dB
+(relative), brightness as a multiplier of the filter cutoff (brighter = 1.5, darker = 0.67).
+Use track "all" for every track. Anything else (new notes, other instruments, effects): action=reject
+and say what you can do. Vague: action=clarify. Output JSON only."""
+
+SCORE_SCHEMA = {"type": "object", "properties": {
+    "action": {"type": "string", "enum": ["change", "clarify", "reject"]},
+    "reading": {"type": "string"}, "message": {"type": "string"},
+    "tempo": {"type": "number", "nullable": True},
+    "changes": {"type": "array", "items": {"type": "object", "properties": {
+        "track": {"type": "string"}, "mute": {"type": "boolean", "nullable": True},
+        "gain_db": {"type": "number", "nullable": True}, "brightness": {"type": "number", "nullable": True}},
+        "required": ["track", "mute", "gain_db", "brightness"]}}},
+    "required": ["action", "reading", "message", "tempo", "changes"]}
+
+
+def handle_score(score, text):
+    """-> (new score, reply text). Never raises for user input."""
+    import copy
+    names = [t["name"] for t in score["tracks"]]
+    prompt = f"tempo {score['tempo']} BPM; tracks: {', '.join(names)}\n\nUSER MESSAGE\n{text}"
+    try:
+        out = call_llm(SCORE_SYSTEM, prompt, SCORE_SCHEMA)
+    except LLMError as e:
+        return score, f"I couldn't reach the language model ({e}). Nothing changed."
+    if out["action"] != "change":
+        return score, out.get("message") or out.get("reading", "")
+    new, lines = copy.deepcopy(score), []
+    if out.get("tempo"):
+        t = float(np.clip(out["tempo"], 40, 240))
+        lines.append(f"Tempo {score['tempo']} → {t} BPM" + (" (clamped to 40–240)" if t != out["tempo"] else ""))
+        new["tempo"] = t
+    for c in out.get("changes", []):
+        targets = new["tracks"] if c["track"] == "all" else [t for t in new["tracks"] if t["name"] == c["track"]]
+        if not targets:
+            lines.append(f"There is no track called '{c['track']}' (tracks: {', '.join(names)}).")
+        for t in targets:
+            if c.get("mute") is not None:
+                t["mute"] = bool(c["mute"])
+                lines.append(f"{t['name']}: {'muted' if t['mute'] else 'unmuted'}")
+            if c.get("gain_db"):
+                t["gain"] = round(float(np.clip(t["gain"] * 10 ** (c["gain_db"] / 20), 0, 2)), 3)
+                lines.append(f"{t['name']}: level {c['gain_db']:+.1f} dB (now {t['gain']})")
+            if c.get("brightness"):
+                if "cutoff" not in t["synth"]:
+                    lines.append(f"{t['name']}: has no filter to brighten")
+                    continue
+                t["synth"]["cutoff"] = int(np.clip(t["synth"]["cutoff"] * c["brightness"], 100, 16000))
+                lines.append(f"{t['name']}: filter cutoff now {t['synth']['cutoff']} Hz")
+    return new, "Reading: " + out.get("reading", "") + "\n" + "\n".join(f"- {x}" for x in lines or ["nothing to change"])
