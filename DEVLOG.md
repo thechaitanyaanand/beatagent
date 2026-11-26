@@ -185,3 +185,6 @@ Numbers quoted are from the run at that moment; final numbers are in `evals/resu
   `index.html` resets the recreation panel when loading a new track and preserves playhead on click-toggle.
 - **Dockerfile fix**: install `torchaudio` alongside `torch` from the CPU wheel index and pre-warm
   `Audio2Beats` to match `grid.py` (still unbuilt locally because the Docker daemon is not running).
+- **Two-track sync in the Web UI**: added `/api/sync/{sid}` and `/api/sync_audio/{sid}` in `server.py`
+  and an inline sync panel in `index.html` (Mix / Track A / Stretched B playback + kick-offset stats)
+  so two-track sync can be auditioned directly in the browser without leaving the page.

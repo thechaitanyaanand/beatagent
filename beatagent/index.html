@@ -62,6 +62,26 @@
     </div>
   </div>
 
+  <div class="panel" id="sync" hidden>
+    <div class="row">
+      <strong>Two-track sync</strong>
+      <label for="sync-b">with</label>
+      <select id="sync-b"></select>
+      <label for="sync-bar">at bar</label>
+      <input id="sync-bar" type="number" min="1" value="33" style="width:74px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);">
+      <button id="sync-go" class="primary">Sync 60 s</button>
+      <span id="sync-meta" class="sub" style="margin:0"></span>
+    </div>
+    <div id="sync-out" hidden style="margin-top:10px">
+      <audio id="sync-player" controls style="width:100%"></audio>
+      <div class="row" style="margin-top:6px">
+        <label><input type="radio" name="sync-src" value="mix" checked> Mix (A + B)</label>
+        <label><input type="radio" name="sync-src" value="a"> Track A</label>
+        <label><input type="radio" name="sync-src" value="b"> Stretched B</label>
+      </div>
+    </div>
+  </div>
+
   <div class="panel" id="chat" hidden>
     <div id="log" aria-live="polite"></div>
     <form id="form"><input id="text" placeholder='e.g. "Cut beat 16–32 and repeat it twice"' autocomplete="off"><button class="primary">Send</button></form>
@@ -86,7 +106,7 @@ async function api(url, opts = {}) {
 }
 async function show(view) {
   S = view;
-  $("editor").hidden = $("chat").hidden = false;
+  $("editor").hidden = $("sync").hidden = $("chat").hidden = false;
   $("title").textContent = view.name;
   const g = view.grid;
   $("meta").textContent = `${g.tempo} BPM · ${g.time_signature} · ${g.n_beats} beats · ${g.n_bars} bars · ${g.constant_tempo ? "constant" : "variable"} tempo · confidence ${g.confidence} · ${view.duration.toFixed(1)} s`;
@@ -112,7 +132,13 @@ function say(text, who, bad, tag) {
 }
 async function load(promise, label) {
   busy(label);
-  try { await show(await promise); $("log").innerHTML = ""; say("Grid ready. Tell me what to change, in beats or bars. Beats count from 0 (beat 16 = bar 5.1); bars from 1.", "agent"); }
+  try {
+    await show(await promise);
+    $("sync-out").hidden = true; $("sync-player").src = ""; $("sync-meta").textContent = "";
+    $("rec").hidden = true; $("frame").src = ""; $("slog").textContent = ""; $("rec-meta").textContent = "";
+    $("log").innerHTML = "";
+    say("Grid ready. Tell me what to change, in beats or bars. Beats count from 0 (beat 16 = bar 5.1); bars from 1.", "agent");
+  }
   catch (e) { say(`Couldn't load: ${e.message}`, "agent", true); $("chat").hidden = false; }
   finally { busy(); }
 }
@@ -145,7 +171,32 @@ $("sform").onsubmit = async e => {
     $("slog").textContent = r.reply; $("frame").src = r.url + "?v=" + Date.now(); $("stext").value = ""; }
   catch (e) { $("slog").textContent = `Error: ${e.message}`; } finally { busy(); }
 };
-api("/api/tracks").then(ts => ts.forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; $("pick").appendChild(o); }));
+function syncSrc() {
+  const part = document.querySelector('input[name="sync-src"]:checked').value;
+  const p = $("sync-player"), t = p.currentTime;
+  p.src = `/api/sync_audio/${S.sid}?part=${part}&v=${Date.now()}`;
+  if (t > 0) p.addEventListener("loadedmetadata", () => { p.currentTime = t; }, { once: true });
+}
+$("sync-go").onclick = async () => {
+  if (!S || !$("sync-b").value) return;
+  busy("Stretching and syncing 60 s…");
+  try {
+    const r = await api(`/api/sync/${S.sid}`, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ track_b: $("sync-b").value, start_bar: +$("sync-bar").value || 33 }) });
+    const med = r.kick_offset_median_ms != null ? ` · ${r.kicks_matched}/${r.kicks_a} kicks (${r.kick_offset_median_ms} ms median, ${r.kick_offset_max_ms} ms max)` : "";
+    $("sync-meta").textContent = `${r.b_bpm} → ${r.a_bpm} BPM · ratio ${r.stretch_ratio}${med}`;
+    $("sync-out").hidden = false;
+    syncSrc();
+  } catch (e) { $("sync-meta").textContent = `Sync error: ${e.message}`; }
+  finally { busy(); }
+};
+document.querySelectorAll('input[name="sync-src"]').forEach(el => el.onchange = () => S && !$("sync-out").hidden && syncSrc());
+api("/api/tracks").then(ts => {
+  ts.forEach(t => {
+    for (const sel of [$("pick"), $("sync-b")]) { const o = document.createElement("option"); o.value = o.textContent = t; sel.appendChild(o); }
+  });
+  if (ts.includes("A7.wav")) $("sync-b").value = "A7.wav";
+});
 </script>
 </body>
 </html>

@@ -57,7 +57,7 @@ clip ──► recreate.py (HPSS, band peaks, Basic Pitch) ──► score JSON 
 | `beatagent/edits.py` | typed ops, range resolution, splicing with crossfade, grid carried through edits, undo/redo |
 | `beatagent/agent.py` | chat → ops via Gemini, range cross-check, echo; chat → score changes for recreations |
 | `beatagent/recreate.py`, `player.html`, `render.py` | clip → score → page → offline WAV |
-| `beatagent/server.py`, `index.html` | web UI: waveform + grid, chat, undo/redo, downloads, recreation with mixer |
+| `beatagent/server.py`, `index.html` | web UI: waveform + grid, two-track sync, chat, undo/redo, downloads, recreation with mixer |
 | `evals/run.py` | every metric in the brief → `evals/results.md` |
 
 **Conventions** (also in every grid JSON):

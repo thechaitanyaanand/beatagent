@@ -13,8 +13,9 @@ from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel
 
 from . import agent
-from .audio import click_audition
+from .audio import click_audition, load
 from .edits import EditError, Session
+from .sync import beatmatch, kick_onsets, match
 
 ROOT = Path(__file__).resolve().parents[1]
 PACK = ROOT / "evals" / "testpack"
@@ -26,6 +27,12 @@ SESSIONS = {}  # ponytail: in-memory, single process; a restart forgets open ses
 
 class Chat(BaseModel):
     text: str
+
+
+class SyncReq(BaseModel):
+    track_b: str
+    start_bar: int = 33
+    seconds: float = 60.0
 
 
 def state(sid):
@@ -173,3 +180,33 @@ def page(sid: str):
     if not p.exists():
         raise HTTPException(404)
     return p.read_text(encoding="utf-8")
+
+
+@app.post("/api/sync/{sid}")
+def sync_tracks(sid: str, body: SyncReq):
+    s = state(sid)
+    b_path = PACK / Path(body.track_b).name
+    if not b_path.exists():
+        raise HTTPException(404, f"{body.track_b} not found in the test pack")
+    try:
+        r = beatmatch(s["path"], b_path, WORK / f"{sid}_sync", start_bar=body.start_bar,
+                      seconds=body.seconds, grid_a=s["session"].grid0)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    A, sr, _ = load(r["files"]["a"])
+    B, _, _ = load(r["files"]["b"])
+    ka, kb = kick_onsets(A.mean(axis=1), sr), kick_onsets(B.mean(axis=1), sr)
+    off = match(ka, kb) * 1000
+    r |= {"kicks_a": len(ka), "kicks_matched": len(off),
+          "kick_offset_median_ms": round(float(np.median(np.abs(off))), 2) if len(off) else None,
+          "kick_offset_max_ms": round(float(np.abs(off).max()), 2) if len(off) else None}
+    s["sync_files"] = r["files"]
+    return {k: v for k, v in r.items() if k != "files"}
+
+
+@app.get("/api/sync_audio/{sid}")
+def sync_audio(sid: str, part: str = "mix"):
+    files = state(sid).get("sync_files") or {}
+    if part not in files or not Path(files[part]).exists():
+        raise HTTPException(404, "run sync first")
+    return FileResponse(files[part])
