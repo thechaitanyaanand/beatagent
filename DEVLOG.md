@@ -142,3 +142,36 @@ Numbers quoted are from the run at that moment; final numbers are in `evals/resu
 - **Seeded noise in the page**, so offline renders are identical run to run.
 - **Offline render** runs the page's own scheduler in an `OfflineAudioContext` in headless
   Chromium (Playwright), and records any network request the page makes (expected: none).
+
+## Evals, UI, packaging
+
+- **One harness, one report.** `evals/run.py` writes every artifact the brief lists (grid, click
+  audition, edited audio, sync render, pages, offline renders) and `evals/results.md`.
+- **"Grid stays true" is measured, not assumed**: after each session the edited audio is re-analysed
+  from scratch and compared with the grid we carried through the edits (F 1.000, 0.03 ms median on
+  steady clips).
+- **Per-drum F in Part 3**, so a missing hat can't hide behind good piano notes.
+- **Web UI is one FastAPI file and one HTML page**, vanilla JS: waveform with the grid drawn on it,
+  click-audition toggle, chat with tagged replies (edit / refused / clarify), undo/redo, downloads,
+  recreation with mixer and score chat. Sessions live in memory (single user).
+- **`python run.py` is the one command** (no `make` on Windows); Docker runs the same thing.
+  The Dockerfile is written but not built here.
+
+## Switch to 0-based beats (after reading the first full transcript)
+
+- With 1-based beats, the brief's "cut beat 16–32" echoed as "bar 4 beat 4 → bar 8 beat 4", an off-bar
+  loop. With beat 0 = first downbeat, it's exactly bars 5–8, and "beat 0 to beat 8" is exactly bars 1–2.
+  The brief says "beat 0", so its author counts from zero. Switched; bars stay 1-based. Echo uses
+  DAW-style bar.beat ("5.1") so it can't be confused with global beat numbers.
+
+## Validation pass
+
+- **The model's "reading" invented a number** ("the last bar before the tempo change (bar 33)") that
+  contradicted the code's echo (bar 32.1 → 33.1). Readings now only restate numbers the user said;
+  exact numbers come from code.
+- **Snare band moved from 300–3000 Hz to 150–1000 Hz**: hat noise was landing in the snare band.
+  P2 note F 0.56 → 0.63 and render onset F 0.81 → 0.99; P1 dipped 0.68 → 0.64. Kept, net better.
+- **Paid Gemini key added later.** Preferred automatically (`GEMINI_API_KEY_PRO`), but full Flash
+  was still overloaded and Pro still over quota, so Flash-Lite stays the default.
+- **Route bug**: a catch-all `/api/{action}/{sid}` swallowed `/api/recreate`; undo/redo are explicit
+  routes now. Found by the headless UI smoke test.

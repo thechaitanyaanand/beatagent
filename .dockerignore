@@ -1,0 +1,6 @@
+.env
+.git
+evals/testpack
+evals/out
+**/__pycache__
+*.pdf
