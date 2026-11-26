@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Agent</title>
+<style>
+  :root { --bg:#f6f5f2; --panel:#fff; --ink:#1d1c1a; --mute:#6b6862; --line:#e2dfd8; --accent:#c2410c; --wave:#9c968c; --beat:#d6d2ca; --down:#c2410c; --err:#b91c1c; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#141413; --panel:#1e1d1b; --ink:#efece6; --mute:#a19d95; --line:#33312d; --accent:#fb923c; --wave:#6f6a62; --beat:#3a3833; --down:#fb923c; --err:#f87171; } }
+  :root[data-theme="dark"] { --bg:#141413; --panel:#1e1d1b; --ink:#efece6; --mute:#a19d95; --line:#33312d; --accent:#fb923c; --wave:#6f6a62; --beat:#3a3833; --down:#fb923c; --err:#f87171; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width:1000px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:20px; margin:0; }
+  .sub { color:var(--mute); margin:2px 0 16px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:14px; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  button, select { font:inherit; padding:7px 14px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button:disabled { opacity:.45; cursor:default; }
+  a { color:var(--accent); }
+  canvas { width:100%; height:150px; display:block; cursor:pointer; }
+  #meta { color:var(--mute); font-size:13px; }
+  #log { max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+  .msg { padding:8px 12px; border-radius:8px; white-space:pre-wrap; max-width:90%; }
+  .user { align-self:flex-end; background:var(--accent); color:#fff; }
+  .agent { align-self:flex-start; background:var(--bg); border:1px solid var(--line); }
+  .agent.bad { border-color:var(--err); }
+  .tag { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--mute); display:block; }
+  form { display:flex; gap:8px; margin-top:10px; }
+  form input { flex:1; font:inherit; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); min-width:0; }
+  #status { color:var(--mute); font-size:13px; min-height:20px; }
+  iframe { width:100%; height:360px; border:1px solid var(--line); border-radius:8px; background:var(--bg); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Beat Agent</h1>
+  <p class="sub">Analyse a track's beat grid, edit it by chatting in beats and bars, or recreate a short loop as Web Audio.</p>
+
+  <div class="panel row">
+    <label for="pick">Track</label>
+    <select id="pick"><option value="">Choose from test pack…</option></select>
+    <span>or</span>
+    <input type="file" id="file" accept=".wav,.flac,.mp3,.aiff" aria-label="Upload audio">
+    <span id="status" role="status"></span>
+  </div>
+
+  <div class="panel" id="editor" hidden>
+    <div class="row" style="justify-content:space-between">
+      <strong id="title"></strong>
+      <span id="meta"></span>
+    </div>
+    <canvas id="wave" aria-label="Waveform with beat grid; click to seek"></canvas>
+    <audio id="player" controls style="width:100%;margin-top:8px"></audio>
+    <div class="row" style="margin-top:8px">
+      <label><input type="checkbox" id="click"> clicks on beats (audition)</label>
+      <button id="undo">Undo</button><button id="redo">Redo</button>
+      <a id="dl-audio" href="#">Download edited audio</a>
+      <a id="dl-grid" href="#">Download grid JSON</a>
+      <button id="recreate">Recreate as Web Audio</button>
+    </div>
+  </div>
+
+  <div class="panel" id="chat" hidden>
+    <div id="log" aria-live="polite"></div>
+    <form id="form"><input id="text" placeholder='e.g. "Cut beat 16–32 and repeat it twice"' autocomplete="off"><button class="primary">Send</button></form>
+  </div>
+
+  <div class="panel" id="rec" hidden>
+    <strong>Recreation</strong> <span id="rec-meta" class="sub"></span>
+    <iframe id="frame" title="Recreated loop"></iframe>
+    <form id="sform"><input id="stext" placeholder='e.g. "mute the drums", "make the bass brighter", "play it at 140"' autocomplete="off"><button class="primary">Send</button></form>
+    <div id="slog" class="sub"></div>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let S = null;
+const busy = (msg) => { $("status").textContent = msg || ""; document.querySelectorAll("button,select,input").forEach(e => e.disabled = !!msg); };
+
+async function api(url, opts = {}) {
+  const r = await fetch(url, opts);
+  if (!r.ok) { const e = await r.json().catch(() => ({ detail: r.statusText })); throw new Error(e.detail || r.statusText); }
+  return r.json();
+}
+async function show(view) {
+  S = view;
+  $("editor").hidden = $("chat").hidden = false;
+  $("title").textContent = view.name;
+  const g = view.grid;
+  $("meta").textContent = `${g.tempo} BPM · ${g.time_signature} · ${g.n_beats} beats · ${g.n_bars} bars · ${g.constant_tempo ? "constant" : "variable"} tempo · confidence ${g.confidence} · ${view.duration.toFixed(1)} s`;
+  $("undo").disabled = !view.can_undo; $("redo").disabled = !view.can_redo;
+  $("dl-audio").href = `/api/export/${view.sid}`; $("dl-grid").href = `/api/grid/${view.sid}`;
+  loadAudio(); draw();
+}
+function loadAudio() { const t = $("player").currentTime; $("player").src = `/api/audio/${S.sid}?v=${Date.now()}&click=${$("click").checked ? 1 : 0}`; $("player").currentTime = Math.min(t, S.duration); }
+function draw() {
+  const c = $("wave"), dpr = devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight, x = c.getContext("2d");
+  c.width = w * dpr; c.height = h * dpr; x.scale(dpr, dpr); x.clearRect(0, 0, w, h);
+  const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim();
+  const sx = t => t / S.duration * w;
+  for (const [t, p] of S.beats) { x.fillStyle = col(p === 1 ? "--down" : "--beat"); x.fillRect(sx(t), 0, p === 1 ? 1.5 : 1, h); }
+  x.fillStyle = col("--wave"); const n = S.peaks.length, max = Math.max(...S.peaks, 1e-6);
+  S.peaks.forEach((v, i) => { const y = v / max * h * 0.45; x.fillRect(i / n * w, h / 2 - y, Math.max(1, w / n), 2 * y); });
+  x.fillStyle = col("--ink"); x.fillRect(sx($("player").currentTime || 0), 0, 1.5, h);
+}
+function say(text, who, bad, tag) {
+  const d = document.createElement("div"); d.className = `msg ${who}${bad ? " bad" : ""}`;
+  if (tag) { const t = document.createElement("span"); t.className = "tag"; t.textContent = tag; d.appendChild(t); }
+  d.appendChild(document.createTextNode(text)); $("log").appendChild(d); $("log").scrollTop = 1e9;
+}
+async function load(promise, label) {
+  busy(label);
+  try { await show(await promise); $("log").innerHTML = ""; say("Grid ready. Tell me what to change, in beats or bars. Beats count from 0 (beat 16 = bar 5.1); bars from 1.", "agent"); }
+  catch (e) { say(`Couldn't load: ${e.message}`, "agent", true); $("chat").hidden = false; }
+  finally { busy(); }
+}
+$("pick").onchange = e => e.target.value && load(api(`/api/load/${encodeURIComponent(e.target.value)}`, { method: "POST" }), "Analysing beats… (a 6-minute track takes about 10 s)");
+$("file").onchange = e => { const f = e.target.files[0]; if (!f) return; const fd = new FormData(); fd.append("file", f); load(api("/api/upload", { method: "POST", body: fd }), "Uploading and analysing…"); };
+$("form").onsubmit = async e => {
+  e.preventDefault(); const text = $("text").value.trim(); if (!text || !S) return;
+  say(text, "user"); $("text").value = ""; busy("Thinking…");
+  try { const r = await api(`/api/chat/${S.sid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) }); say(r.reply.text, "agent", !r.reply.ok, r.reply.action); await show(r); }
+  catch (e) { say(`Error: ${e.message}`, "agent", true); } finally { busy(); }
+};
+for (const a of ["undo", "redo"]) $(a).onclick = async () => {
+  busy(a === "undo" ? "Undoing…" : "Redoing…");
+  try { const r = await api(`/api/${a}/${S.sid}`, { method: "POST" }); say(r.reply.text, "agent", !r.reply.ok, a); await show(r); }
+  catch (e) { say(`Error: ${e.message}`, "agent", true); } finally { busy(); }
+};
+$("click").onchange = loadAudio;
+$("wave").onclick = e => { const r = e.target.getBoundingClientRect(); $("player").currentTime = (e.clientX - r.left) / r.width * S.duration; };
+$("player").ontimeupdate = () => S && draw();
+window.onresize = () => S && draw();
+$("recreate").onclick = async () => {
+  busy("Transcribing and building the page…");
+  try { const r = await api(`/api/recreate/${S.sid}`, { method: "POST" }); $("rec").hidden = false; $("frame").src = r.url + "?v=" + Date.now();
+    $("rec-meta").textContent = ` ${r.score.bars} bars at ${r.score.tempo} BPM · ` + r.score.tracks.map(t => `${t.name}: ${t.notes.length} notes`).join(", "); }
+  catch (e) { say(`Recreate: ${e.message}`, "agent", true); } finally { busy(); }
+};
+$("sform").onsubmit = async e => {
+  e.preventDefault(); const text = $("stext").value.trim(); if (!text) return; busy("Thinking…");
+  try { const r = await api(`/api/score_chat/${S.sid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    $("slog").textContent = r.reply; $("frame").src = r.url + "?v=" + Date.now(); $("stext").value = ""; }
+  catch (e) { $("slog").textContent = `Error: ${e.message}`; } finally { busy(); }
+};
+api("/api/tracks").then(ts => ts.forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; $("pick").appendChild(o); }));
+</script>
+</body>
+</html>
