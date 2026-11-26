@@ -1,0 +1,188 @@
+[
+ {
+  "session": "1",
+  "clip": "A1",
+  "turns": [
+   {
+    "user": "Cut beat 16–32 and repeat it twice.",
+    "action": "edit",
+    "ok": true,
+    "ops": [
+     {
+      "op": "repeat",
+      "range": {
+       "unit": "beat",
+       "anchor": "absolute",
+       "start": 16,
+       "end": 32,
+       "count": null
+      },
+      "total_plays": 2
+     }
+    ],
+    "reply": "Reading: Cut beat 16-32 and repeat it twice.\n- Repeated from beat 16 up to beat 32 (16 beats, bar 5.1 → bar 9.1), 8.112 s → 15.854 s (7.742 s): it now plays 2 times in a row, then the track continues.\n- Track is now 6:10.112 long (+7.742 s vs original), 761 beats, 191 bars."
+   },
+   {
+    "user": "Now fade out the last 8 beats.",
+    "action": "edit",
+    "ok": true,
+    "ops": [
+     {
+      "op": "fade",
+      "range": {
+       "unit": "beat",
+       "anchor": "last",
+       "start": null,
+       "end": null,
+       "count": 8
+      },
+      "direction": "out"
+     }
+    ],
+    "reply": "Reading: Fade out the last 8 beats.\n- Fade out over from beat 753 up to the end of the track (8 beats, bar 189.2 → end of track), 364.724 s → 370.112 s (5.388 s).\n- Track is now 6:10.112 long (+7.742 s vs original), 761 beats, 191 bars."
+   },
+   {
+    "user": "Undo.",
+    "action": "undo",
+    "ok": true,
+    "ops": [],
+    "reply": "Undid: Fade out over from beat 753 up to the end of the track (8 beats, bar 189.2 → end of track), 364.724 s → 370.112 s (5.388 s).\nTrack is now 6:10.112 long (+7.742 s vs original), 761 beats, 191 bars."
+   },
+   {
+    "user": "Remove bar 5.",
+    "action": "edit",
+    "ok": true,
+    "ops": [
+     {
+      "op": "remove",
+      "range": {
+       "unit": "bar",
+       "anchor": "absolute",
+       "start": 5,
+       "end": 5,
+       "count": null
+      }
+     }
+    ],
+    "reply": "Reading: Remove bar 5.\n- Removed from beat 16 up to beat 20 (4 beats, bar 5.1 → bar 6.1), 8.112 s → 10.047 s (1.935 s).\n- Track is now 6:08.176 long (+5.806 s vs original), 757 beats, 190 bars."
+   }
+  ],
+  "edits_applied": 2,
+  "sample_rate_kept": true,
+  "format": "WAV/PCM_16 -> WAV/PCM_16",
+  "grid_vs_reanalysis_f": 1.0,
+  "grid_vs_reanalysis_median_ms": 0.029813439937242947
+ },
+ {
+  "session": "2",
+  "clip": "A2",
+  "turns": [
+   {
+    "user": "Loop the first 4 bars four times, then let the track play on.",
+    "action": "edit",
+    "ok": true,
+    "ops": [
+     {
+      "op": "repeat",
+      "range": {
+       "unit": "bar",
+       "anchor": "first",
+       "start": null,
+       "end": null,
+       "count": 4
+      },
+      "total_plays": 4
+     }
+    ],
+    "reply": "Reading: Loop the first 4 bars four times, then let the track play on.\n- Repeated from beat 0 up to beat 16 (16 beats, bar 1.1 → bar 5.1), 0.251 s → 5.705 s (5.455 s): it now plays 4 times in a row, then the track continues.\n- Track is now 1:45.886 long (+16.364 s vs original), 304 beats, 76 bars."
+   }
+  ],
+  "edits_applied": 1,
+  "sample_rate_kept": true,
+  "format": "FLAC/PCM_24 -> FLAC/PCM_24",
+  "grid_vs_reanalysis_f": 1.0,
+  "grid_vs_reanalysis_median_ms": 0.03429541771282629
+ },
+ {
+  "session": "3",
+  "clip": "A5",
+  "turns": [
+   {
+    "user": "Repeat the last bar before the tempo change twice.",
+    "action": "edit",
+    "ok": true,
+    "ops": [
+     {
+      "op": "repeat",
+      "range": {
+       "unit": "bar",
+       "anchor": "before_tempo_change",
+       "start": null,
+       "end": null,
+       "count": 1
+      },
+      "total_plays": 2
+     }
+    ],
+    "reply": "Reading: I will repeat the last bar before the tempo change twice.\n- Repeated from beat 124 up to beat 128 (4 beats, bar 32.1 → bar 33.1), 62.100 s → 64.100 s (2.000 s): it now plays 2 times in a row, then the track continues.\n- Track is now 2:06.282 long (+2.000 s vs original), 260 beats, 65 bars."
+   }
+  ],
+  "edits_applied": 1,
+  "sample_rate_kept": true,
+  "format": "WAV/PCM_16 -> WAV/PCM_16",
+  "grid_vs_reanalysis_f": 1.0,
+  "grid_vs_reanalysis_median_ms": 0.10022799585307496
+ },
+ {
+  "session": "4",
+  "clip": "A1",
+  "turns": [
+   {
+    "user": "Chop out the boring part.",
+    "action": "clarify",
+    "ok": true,
+    "ops": [],
+    "reply": "Which part is boring? For example, we could remove bars 97-112 where the energy drops, or another range. Please specify the bars or beats you want to remove."
+   }
+  ],
+  "edits_applied": 0,
+  "sample_rate_kept": true,
+  "format": "WAV/PCM_16 -> WAV/PCM_16"
+ },
+ {
+  "session": "5",
+  "clip": "A3",
+  "turns": [
+   {
+    "user": "Cut beat 0 to beat 8.",
+    "action": "edit",
+    "ok": true,
+    "ops": [
+     {
+      "op": "remove",
+      "range": {
+       "unit": "beat",
+       "anchor": "absolute",
+       "start": 0,
+       "end": 8,
+       "count": null
+      }
+     }
+    ],
+    "reply": "Reading: I will remove beat 0 to beat 8.\n- Removed from beat 0 up to beat 8 (8 beats, bar 1.1 → bar 3.1), 0.384 s → 5.130 s (4.746 s).\n- Track is now 1:58.053 long (-4.746 s vs original), 190 beats, 48 bars."
+   },
+   {
+    "user": "Delete bars 200–210.",
+    "action": "reject",
+    "ok": false,
+    "ops": [],
+    "reply": "The track only has 48 bars. Please choose a range within bars 1 to 48."
+   }
+  ],
+  "edits_applied": 1,
+  "sample_rate_kept": true,
+  "format": "MP3/MPEG_LAYER_III -> WAV/PCM_16",
+  "grid_vs_reanalysis_f": 0.917098445595855,
+  "grid_vs_reanalysis_median_ms": 0.9365079365082352
+ }
+]

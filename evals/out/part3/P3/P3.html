@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loop Recreation</title>
+<style>
+  :root { --bg:#f6f5f2; --panel:#fff; --ink:#1d1c1a; --mute:#6b6862; --line:#e2dfd8; --accent:#c2410c; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#141413; --panel:#1e1d1b; --ink:#efece6; --mute:#a19d95; --line:#33312d; --accent:#fb923c; } }
+  :root[data-theme="dark"] { --bg:#141413; --panel:#1e1d1b; --ink:#efece6; --mute:#a19d95; --line:#33312d; --accent:#fb923c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:24px 16px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--mute); margin:0 0 20px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  button { font:inherit; padding:8px 18px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  input[type=number] { width:80px; font:inherit; padding:6px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  .track { display:grid; grid-template-columns: 1fr auto 2fr; gap:12px; align-items:center; padding:8px 0; border-top:1px solid var(--line); }
+  .track:first-of-type { border-top:0; }
+  .track small { color:var(--mute); display:block; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  #status { color:var(--mute); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Loop Recreation</h1>
+  <p class="sub" id="info"></p>
+  <div class="panel row">
+    <button class="primary" id="play">Play</button>
+    <button id="stop">Stop</button>
+    <label>Tempo <input type="number" id="tempo" min="40" max="240" step="0.1"></label>
+    <span id="status">Stopped</span>
+  </div>
+  <div class="panel" id="mixer"></div>
+</main>
+<script>
+// Generated from analysis. Synthesis only: no samples from the original, no network requests.
+const SCORE = {"tempo": 90.0, "time_signature": "4/4", "bars": 8, "loop_beats": 32, "beats_per_bar": 4, "source": "P3.wav", "note_units": "start and duration are in beats from the loop start; pitch is MIDI; drums use GM (36 kick, 38 snare, 42 hat)", "perc_to_harm_ratio": 0.061, "tracks": [{"name": "bass", "kind": "bass", "gain": 0.8, "mute": false, "synth": {"wave": "sawtooth", "cutoff": 330, "q": 6, "attack": 0.005, "release": 0.06}, "notes": [{"start": 0.0174, "duration": 1.9679, "pitch": 48, "velocity": 1.0}, {"start": 2.0027, "duration": 1.935, "pitch": 48, "velocity": 1.0}, {"start": 11.9892, "duration": 2.0201, "pitch": 48, "velocity": 1.0}, {"start": 14.0093, "duration": 1.9176, "pitch": 48, "velocity": 1.0}]}, {"name": "keys", "kind": "keys", "gain": 0.5, "mute": false, "synth": {"wave": "triangle", "cutoff": 985, "q": 1, "attack": 0.004, "release": 0.25, "decay": 1.2}, "notes": [{"start": 0.0174, "duration": 0.3657, "pitch": 96, "velocity": 0.619}, {"start": 0.0174, "duration": 0.5224, "pitch": 72, "velocity": 1.0}, {"start": 0.0174, "duration": 1.9679, "pitch": 52, "velocity": 1.0}, {"start": 0.0174, "duration": 1.9679, "pitch": 55, "velocity": 1.0}, {"start": 1.4803, "duration": 0.505, "pitch": 76, "velocity": 1.0}, {"start": 1.9853, "duration": 0.5747, "pitch": 77, "velocity": 1.0}, {"start": 2.0027, "duration": 0.2961, "pitch": 101, "velocity": 0.552}, {"start": 2.0027, "duration": 0.3483, "pitch": 67, "velocity": 0.561}, {"start": 2.0027, "duration": 1.9176, "pitch": 52, "velocity": 1.0}, {"start": 2.0027, "duration": 1.935, "pitch": 55, "velocity": 1.0}, {"start": 2.9799, "duration": 0.5747, "pitch": 74, "velocity": 1.0}, {"start": 3.99, "duration": 0.4876, "pitch": 60, "velocity": 1.0}, {"start": 3.99, "duration": 2.0046, "pitch": 53, "velocity": 1.0}, {"start": 3.99, "duration": 2.0046, "pitch": 57, "velocity": 1.0}, {"start": 4.0248, "duration": 0.2612, "pitch": 84, "velocity": 0.484}, {"start": 4.4776, "duration": 0.4005, "pitch": 96, "velocity": 0.6}, {"start": 4.4776, "duration": 0.5747, "pitch": 72, "velocity": 1.0}, {"start": 4.4776, "duration": 1.517, "pitch": 60, "velocity": 1.0}, {"start": 5.0, "duration": 0.5747, "pitch": 76, "velocity": 1.0}, {"start": 5.9772, "duration": 0.3831, "pitch": 101, "velocity": 0.574}, {"start": 5.9772, "duration": 0.5747, "pitch": 77, "velocity": 1.0}, {"start": 5.9946, "duration": 1.8286, "pitch": 53, "velocity": 1.0}, {"start": 5.9946, "duration": 1.8808, "pitch": 57, "velocity": 1.0}, {"start": 5.9946, "duration": 1.8982, "pitch": 60, "velocity": 1.0}, {"start": 7.4923, "duration": 0.5573, "pitch": 74, "velocity": 1.0}, {"start": 7.9973, "duration": 0.5399, "pitch": 72, "velocity": 0.957}, {"start": 7.9973, "duration": 2.0046, "pitch": 55, "velocity": 0.989}, {"start": 7.9973, "duration": 2.0046, "pitch": 62, "velocity": 1.0}, {"start": 8.0147, "duration": 0.2961, "pitch": 96, "velocity": 0.552}, {"start": 8.0147, "duration": 1.9872, "pitch": 59, "velocity": 1.0}, {"start": 8.9745, "duration": 0.5747, "pitch": 76, "velocity": 1.0}, {"start": 10.002, "duration": 0.9752, "pitch": 62, "velocity": 1.0}, {"start": 10.002, "duration": 1.935, "pitch": 59, "velocity": 1.0}, {"start": 10.002, "duration": 1.9872, "pitch": 55, "velocity": 1.0}, {"start": 10.0194, "duration": 0.2264, "pitch": 86, "velocity": 0.572}, {"start": 10.4896, "duration": 0.3831, "pitch": 101, "velocity": 0.584}, {"start": 10.4896, "duration": 0.5573, "pitch": 77, "velocity": 1.0}, {"start": 10.9772, "duration": 0.9946, "pitch": 62, "velocity": 0.962}, {"start": 10.9946, "duration": 0.5747, "pitch": 74, "velocity": 1.0}, {"start": 11.9718, "duration": 0.418, "pitch": 96, "velocity": 0.601}, {"start": 11.9718, "duration": 0.5921, "pitch": 72, "velocity": 1.0}, {"start": 11.9892, "duration": 0.3309, "pitch": 60, "velocity": 0.411}, {"start": 11.9892, "duration": 2.0201, "pitch": 52, "velocity": 1.0}, {"start": 11.9892, "duration": 2.0201, "pitch": 55, "velocity": 1.0}, {"start": 13.4869, "duration": 0.505, "pitch": 76, "velocity": 1.0}, {"start": 13.9919, "duration": 0.3657, "pitch": 101, "velocity": 0.541}, {"start": 13.9919, "duration": 0.5573, "pitch": 77, "velocity": 1.0}, {"start": 14.0093, "duration": 0.3309, "pitch": 67, "velocity": 0.54}, {"start": 14.0093, "duration": 1.9176, "pitch": 52, "velocity": 1.0}, {"start": 14.0093, "duration": 1.935, "pitch": 55, "velocity": 1.0}, {"start": 14.9865, "duration": 0.5747, "pitch": 74, "velocity": 1.0}, {"start": 15.9966, "duration": 0.2961, "pitch": 88, "velocity": 0.599}, {"start": 15.9966, "duration": 0.9752, "pitch": 64, "velocity": 1.0}, {"start": 15.9966, "duration": 1.9872, "pitch": 61, "velocity": 1.0}, {"start": 15.9966, "duration": 2.0046, "pitch": 57, "velocity": 1.0}, {"start": 16.4842, "duration": 0.5573, "pitch": 72, "velocity": 1.0}, {"start": 16.519, "duration": 0.209, "pitch": 96, "velocity": 0.488}, {"start": 16.9718, "duration": 0.3657, "pitch": 100, "velocity": 0.554}, {"start": 16.9718, "duration": 1.0294, "pitch": 64, "velocity": 1.0}, {"start": 16.9892, "duration": 0.5921, "pitch": 76, "velocity": 1.0}, {"start": 17.9838, "duration": 0.3831, "pitch": 101, "velocity": 0.623}, {"start": 17.9838, "duration": 0.5399, "pitch": 77, "velocity": 1.0}, {"start": 17.9838, "duration": 1.8286, "pitch": 61, "velocity": 1.0}, {"start": 18.0012, "duration": 1.8808, "pitch": 64, "velocity": 1.0}, {"start": 18.0012, "duration": 2.0027, "pitch": 57, "velocity": 1.0}, {"start": 19.4815, "duration": 0.5573, "pitch": 74, "velocity": 1.0}, {"start": 19.9865, "duration": 0.4354, "pitch": 96, "velocity": 0.627}, {"start": 20.0039, "duration": 0.5573, "pitch": 72, "velocity": 1.0}, {"start": 20.0039, "duration": 1.9872, "pitch": 53, "velocity": 1.0}, {"start": 20.0039, "duration": 1.9872, "pitch": 57, "velocity": 1.0}, {"start": 20.0039, "duration": 1.9872, "pitch": 60, "velocity": 1.0}, {"start": 20.9811, "duration": 0.5747, "pitch": 76, "velocity": 1.0}, {"start": 21.9912, "duration": 1.9176, "pitch": 53, "velocity": 0.944}, {"start": 21.9912, "duration": 1.935, "pitch": 57, "velocity": 1.0}, {"start": 21.9912, "duration": 1.9524, "pitch": 60, "velocity": 1.0}, {"start": 22.026, "duration": 0.2438, "pitch": 84, "velocity": 0.535}, {"start": 22.4962, "duration": 0.5573, "pitch": 77, "velocity": 1.0}, {"start": 22.5136, "duration": 0.2786, "pitch": 101, "velocity": 0.513}, {"start": 23.0012, "duration": 0.5747, "pitch": 74, "velocity": 1.0}, {"start": 23.9784, "duration": 0.5399, "pitch": 72, "velocity": 0.967}, {"start": 23.9958, "duration": 0.3657, "pitch": 96, "velocity": 0.519}, {"start": 23.9958, "duration": 2.0027, "pitch": 55, "velocity": 0.961}, {"start": 23.9958, "duration": 2.0027, "pitch": 59, "velocity": 1.0}, {"start": 23.9958, "duration": 2.0027, "pitch": 62, "velocity": 1.0}, {"start": 25.4935, "duration": 0.4876, "pitch": 76, "velocity": 1.0}, {"start": 25.9811, "duration": 0.418, "pitch": 101, "velocity": 0.592}, {"start": 25.9811, "duration": 0.5573, "pitch": 77, "velocity": 1.0}, {"start": 25.9985, "duration": 0.9772, "pitch": 62, "velocity": 1.0}, {"start": 25.9985, "duration": 2.0046, "pitch": 55, "velocity": 1.0}, {"start": 25.9985, "duration": 2.0046, "pitch": 59, "velocity": 1.0}, {"start": 26.9757, "duration": 0.5921, "pitch": 74, "velocity": 1.0}, {"start": 26.9757, "duration": 1.0275, "pitch": 62, "velocity": 1.0}, {"start": 28.0032, "duration": 1.4977, "pitch": 59, "velocity": 1.0}, {"start": 28.0032, "duration": 1.9872, "pitch": 55, "velocity": 0.96}, {"start": 28.0032, "duration": 1.9872, "pitch": 62, "velocity": 1.0}, {"start": 28.0206, "duration": 0.2612, "pitch": 86, "velocity": 0.528}, {"start": 28.4908, "duration": 0.3483, "pitch": 96, "velocity": 0.571}, {"start": 28.4908, "duration": 0.5573, "pitch": 72, "velocity": 1.0}, {"start": 28.9784, "duration": 0.5921, "pitch": 76, "velocity": 1.0}, {"start": 28.9958, "duration": 0.1916, "pitch": 100, "velocity": 0.49}, {"start": 29.5009, "duration": 0.507, "pitch": 59, "velocity": 1.0}, {"start": 29.973, "duration": 0.418, "pitch": 101, "velocity": 0.606}, {"start": 29.9904, "duration": 0.5399, "pitch": 77, "velocity": 1.0}, {"start": 29.9904, "duration": 1.7763, "pitch": 55, "velocity": 1.0}, {"start": 29.9904, "duration": 1.7763, "pitch": 62, "velocity": 1.0}, {"start": 30.0078, "duration": 1.7589, "pitch": 59, "velocity": 1.0}, {"start": 31.4881, "duration": 0.2786, "pitch": 74, "velocity": 1.0}]}]};
+const state = { tempo: SCORE.tempo, tracks: SCORE.tracks.map(t => ({ gain: t.gain, mute: t.mute })) };
+
+const noiseCache = new WeakMap();
+function noise(ctx) { // seeded, so every render is identical
+  if (!noiseCache.has(ctx)) {
+    const b = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), d = b.getChannelData(0);
+    let s = 12345;
+    for (let i = 0; i < d.length; i++) { s = (s * 1103515245 + 12345) & 0x7fffffff; d[i] = s / 0x3fffffff - 1; }
+    noiseCache.set(ctx, b);
+  }
+  return noiseCache.get(ctx);
+}
+function env(ctx, out, t, peak, decay) {
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(peak, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+  g.connect(out);
+  return g;
+}
+function noiseHit(ctx, out, t, type, freq, q, peak, decay) {
+  const src = ctx.createBufferSource(), f = ctx.createBiquadFilter();
+  src.buffer = noise(ctx); f.type = type; f.frequency.value = freq; f.Q.value = q;
+  src.connect(f).connect(env(ctx, out, t, peak, decay));
+  src.start(t, (t * 7.31) % 0.5); src.stop(t + decay + 0.01);
+}
+const DRUMS = {
+  36(ctx, out, t, v) { // kick: falling sine
+    const o = ctx.createOscillator();
+    o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    o.connect(env(ctx, out, t, v, 0.4)); o.start(t); o.stop(t + 0.42);
+  },
+  38(ctx, out, t, v) { // snare: band noise + body tone
+    noiseHit(ctx, out, t, "bandpass", 1800, 0.7, 0.8 * v, 0.2);
+    const o = ctx.createOscillator(); o.frequency.value = 190;
+    o.connect(env(ctx, out, t, 0.5 * v, 0.1)); o.start(t); o.stop(t + 0.12);
+  },
+  42(ctx, out, t, v) { noiseHit(ctx, out, t, "highpass", 7000, 0.7, 0.5 * v, 0.05); }, // hat
+};
+function note(ctx, out, track, n, t, spb) {
+  if (track.kind === "drums") return (DRUMS[n.pitch] || DRUMS[42])(ctx, out, t, n.velocity);
+  const s = track.synth, dur = n.duration * spb, peak = 0.4 * n.velocity;
+  const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  o.type = s.wave; o.frequency.value = 440 * 2 ** ((n.pitch - 69) / 12);
+  f.type = "lowpass"; f.frequency.value = s.cutoff; f.Q.value = s.q;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(peak, t + s.attack);
+  if (s.decay) g.gain.setTargetAtTime(peak * 0.25, t + s.attack, s.decay / 3);
+  g.gain.setTargetAtTime(0, t + dur, s.release / 3);
+  o.connect(f).connect(g).connect(out);
+  o.start(t); o.stop(t + dur + s.release * 4);
+}
+function buses(ctx, dest) {
+  return SCORE.tracks.map((_, i) => {
+    const g = ctx.createGain();
+    g.gain.value = state.tracks[i].mute ? 0 : state.tracks[i].gain;
+    g.connect(dest);
+    return g;
+  });
+}
+function loopSeconds() { return SCORE.loop_beats * 60 / state.tempo; }
+function scheduleLoop(ctx, bus, t0) {
+  const spb = 60 / state.tempo;
+  SCORE.tracks.forEach((tr, i) => tr.notes.forEach(n => note(ctx, bus[i], tr, n, t0 + n.start * spb, spb)));
+}
+
+// live playback: schedule whole loops just ahead of time; each starts exactly where the last ends
+let live = null;
+function play() {
+  stop();
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const master = ctx.createGain(); master.connect(ctx.destination);
+  const bus = buses(ctx, master);
+  live = { ctx, master, bus, next: ctx.currentTime + 0.1 };
+  const tick = () => {
+    while (live && live.next < live.ctx.currentTime + 0.5) { scheduleLoop(ctx, bus, live.next); live.next += loopSeconds(); }
+  };
+  tick(); live.timer = setInterval(tick, 100);
+  status(`Playing ${SCORE.bars} bars on loop at ${state.tempo} BPM`);
+}
+function stop() {
+  if (!live) return;
+  clearInterval(live.timer); live.master.disconnect(); live.ctx.close(); live = null;
+  status("Stopped");
+}
+function status(s) { document.getElementById("status").textContent = s; }
+
+// offline render for evals: same code path, returns base64 float32 PCM
+window.renderOffline = async (loops = 1, sr = 44100) => {
+  const ctx = new OfflineAudioContext(1, Math.ceil(loops * loopSeconds() * sr), sr);
+  const bus = buses(ctx, ctx.destination);
+  for (let k = 0; k < loops; k++) scheduleLoop(ctx, bus, k * loopSeconds());
+  const pcm = (await ctx.startRendering()).getChannelData(0);
+  const bytes = new Uint8Array(pcm.buffer); let s = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+
+// UI
+document.getElementById("info").textContent =
+  `${SCORE.bars} bars of ${SCORE.time_signature} at ${SCORE.tempo} BPM, recreated from ${SCORE.source}`;
+const tempo = document.getElementById("tempo");
+tempo.value = state.tempo;
+tempo.onchange = () => { const v = +tempo.value; if (v >= 40 && v <= 240) state.tempo = v; };
+document.getElementById("play").onclick = play;
+document.getElementById("stop").onclick = stop;
+const mixer = document.getElementById("mixer");
+SCORE.tracks.forEach((t, i) => {
+  const row = document.createElement("div"); row.className = "track";
+  row.innerHTML = `<div><strong>${t.name}</strong><small>${t.notes.length} notes</small></div>
+    <label><input type="checkbox" ${t.mute ? "checked" : ""}> mute</label>
+    <input type="range" min="0" max="1.5" step="0.01" value="${t.gain}" aria-label="${t.name} level">`;
+  const [m, g] = row.querySelectorAll("input");
+  const apply = () => { state.tracks[i].mute = m.checked; state.tracks[i].gain = +g.value;
+    if (live) live.bus[i].gain.value = m.checked ? 0 : +g.value; };
+  m.onchange = apply; g.oninput = apply;
+  mixer.appendChild(row);
+});
+</script>
+</body>
+</html>

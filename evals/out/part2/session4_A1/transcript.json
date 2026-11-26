@@ -1,0 +1,9 @@
+[
+ {
+  "user": "Chop out the boring part.",
+  "action": "clarify",
+  "ok": true,
+  "ops": [],
+  "reply": "Which part is boring? For example, we could remove bars 97-112 where the energy drops, or another range. Please specify the bars or beats you want to remove."
+ }
+]

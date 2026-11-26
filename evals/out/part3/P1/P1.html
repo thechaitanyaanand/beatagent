@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loop Recreation</title>
+<style>
+  :root { --bg:#f6f5f2; --panel:#fff; --ink:#1d1c1a; --mute:#6b6862; --line:#e2dfd8; --accent:#c2410c; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#141413; --panel:#1e1d1b; --ink:#efece6; --mute:#a19d95; --line:#33312d; --accent:#fb923c; } }
+  :root[data-theme="dark"] { --bg:#141413; --panel:#1e1d1b; --ink:#efece6; --mute:#a19d95; --line:#33312d; --accent:#fb923c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:24px 16px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--mute); margin:0 0 20px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  button { font:inherit; padding:8px 18px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  input[type=number] { width:80px; font:inherit; padding:6px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  .track { display:grid; grid-template-columns: 1fr auto 2fr; gap:12px; align-items:center; padding:8px 0; border-top:1px solid var(--line); }
+  .track:first-of-type { border-top:0; }
+  .track small { color:var(--mute); display:block; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  #status { color:var(--mute); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Loop Recreation</h1>
+  <p class="sub" id="info"></p>
+  <div class="panel row">
+    <button class="primary" id="play">Play</button>
+    <button id="stop">Stop</button>
+    <label>Tempo <input type="number" id="tempo" min="40" max="240" step="0.1"></label>
+    <span id="status">Stopped</span>
+  </div>
+  <div class="panel" id="mixer"></div>
+</main>
+<script>
+// Generated from analysis. Synthesis only: no samples from the original, no network requests.
+const SCORE = {"tempo": 100.0, "time_signature": "4/4", "bars": 2, "loop_beats": 8, "beats_per_bar": 4, "source": "P1.wav", "note_units": "start and duration are in beats from the loop start; pitch is MIDI; drums use GM (36 kick, 38 snare, 42 hat)", "perc_to_harm_ratio": 0.91, "tracks": [{"name": "drums", "kind": "drums", "gain": 1.0, "mute": false, "synth": {}, "notes": [{"start": 0.0048, "duration": 0.25, "pitch": 36, "velocity": 0.778}, {"start": 0.0048, "duration": 0.25, "pitch": 38, "velocity": 0.421}, {"start": 0.4983, "duration": 0.25, "pitch": 42, "velocity": 0.671}, {"start": 0.9965, "duration": 0.25, "pitch": 36, "velocity": 0.443}, {"start": 1.0014, "duration": 0.25, "pitch": 38, "velocity": 0.802}, {"start": 1.4996, "duration": 0.25, "pitch": 42, "velocity": 0.73}, {"start": 1.9979, "duration": 0.25, "pitch": 42, "velocity": 0.668}, {"start": 2.4961, "duration": 0.25, "pitch": 38, "velocity": 0.996}, {"start": 2.501, "duration": 0.25, "pitch": 36, "velocity": 0.841}, {"start": 2.9992, "duration": 0.25, "pitch": 38, "velocity": 0.805}, {"start": 3.4975, "duration": 0.25, "pitch": 42, "velocity": 0.623}, {"start": 3.9958, "duration": 0.25, "pitch": 38, "velocity": 1.0}, {"start": 4.0006, "duration": 0.25, "pitch": 36, "velocity": 1.0}, {"start": 4.4989, "duration": 0.25, "pitch": 42, "velocity": 0.588}, {"start": 4.9971, "duration": 0.25, "pitch": 36, "velocity": 0.464}, {"start": 5.002, "duration": 0.25, "pitch": 38, "velocity": 0.741}, {"start": 5.5002, "duration": 0.25, "pitch": 42, "velocity": 0.578}, {"start": 5.9985, "duration": 0.25, "pitch": 42, "velocity": 1.0}, {"start": 6.4967, "duration": 0.25, "pitch": 36, "velocity": 0.878}, {"start": 6.4967, "duration": 0.25, "pitch": 38, "velocity": 0.995}, {"start": 6.9998, "duration": 0.25, "pitch": 38, "velocity": 0.725}, {"start": 7.4981, "duration": 0.25, "pitch": 42, "velocity": 0.675}]}, {"name": "bass", "kind": "bass", "gain": 0.8, "mute": false, "synth": {"wave": "sawtooth", "cutoff": 200, "q": 6, "attack": 0.005, "release": 0.06}, "notes": [{"start": 0.387, "duration": 0.4257, "pitch": 30, "velocity": 0.545}, {"start": 4.1237, "duration": 0.6966, "pitch": 30, "velocity": 0.53}, {"start": 6.4457, "duration": 0.2537, "pitch": 40, "velocity": 0.57}, {"start": 6.4457, "duration": 1.0083, "pitch": 30, "velocity": 0.537}]}]};
+const state = { tempo: SCORE.tempo, tracks: SCORE.tracks.map(t => ({ gain: t.gain, mute: t.mute })) };
+
+const noiseCache = new WeakMap();
+function noise(ctx) { // seeded, so every render is identical
+  if (!noiseCache.has(ctx)) {
+    const b = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), d = b.getChannelData(0);
+    let s = 12345;
+    for (let i = 0; i < d.length; i++) { s = (s * 1103515245 + 12345) & 0x7fffffff; d[i] = s / 0x3fffffff - 1; }
+    noiseCache.set(ctx, b);
+  }
+  return noiseCache.get(ctx);
+}
+function env(ctx, out, t, peak, decay) {
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(peak, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+  g.connect(out);
+  return g;
+}
+function noiseHit(ctx, out, t, type, freq, q, peak, decay) {
+  const src = ctx.createBufferSource(), f = ctx.createBiquadFilter();
+  src.buffer = noise(ctx); f.type = type; f.frequency.value = freq; f.Q.value = q;
+  src.connect(f).connect(env(ctx, out, t, peak, decay));
+  src.start(t, (t * 7.31) % 0.5); src.stop(t + decay + 0.01);
+}
+const DRUMS = {
+  36(ctx, out, t, v) { // kick: falling sine
+    const o = ctx.createOscillator();
+    o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    o.connect(env(ctx, out, t, v, 0.4)); o.start(t); o.stop(t + 0.42);
+  },
+  38(ctx, out, t, v) { // snare: band noise + body tone
+    noiseHit(ctx, out, t, "bandpass", 1800, 0.7, 0.8 * v, 0.2);
+    const o = ctx.createOscillator(); o.frequency.value = 190;
+    o.connect(env(ctx, out, t, 0.5 * v, 0.1)); o.start(t); o.stop(t + 0.12);
+  },
+  42(ctx, out, t, v) { noiseHit(ctx, out, t, "highpass", 7000, 0.7, 0.5 * v, 0.05); }, // hat
+};
+function note(ctx, out, track, n, t, spb) {
+  if (track.kind === "drums") return (DRUMS[n.pitch] || DRUMS[42])(ctx, out, t, n.velocity);
+  const s = track.synth, dur = n.duration * spb, peak = 0.4 * n.velocity;
+  const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  o.type = s.wave; o.frequency.value = 440 * 2 ** ((n.pitch - 69) / 12);
+  f.type = "lowpass"; f.frequency.value = s.cutoff; f.Q.value = s.q;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(peak, t + s.attack);
+  if (s.decay) g.gain.setTargetAtTime(peak * 0.25, t + s.attack, s.decay / 3);
+  g.gain.setTargetAtTime(0, t + dur, s.release / 3);
+  o.connect(f).connect(g).connect(out);
+  o.start(t); o.stop(t + dur + s.release * 4);
+}
+function buses(ctx, dest) {
+  return SCORE.tracks.map((_, i) => {
+    const g = ctx.createGain();
+    g.gain.value = state.tracks[i].mute ? 0 : state.tracks[i].gain;
+    g.connect(dest);
+    return g;
+  });
+}
+function loopSeconds() { return SCORE.loop_beats * 60 / state.tempo; }
+function scheduleLoop(ctx, bus, t0) {
+  const spb = 60 / state.tempo;
+  SCORE.tracks.forEach((tr, i) => tr.notes.forEach(n => note(ctx, bus[i], tr, n, t0 + n.start * spb, spb)));
+}
+
+// live playback: schedule whole loops just ahead of time; each starts exactly where the last ends
+let live = null;
+function play() {
+  stop();
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const master = ctx.createGain(); master.connect(ctx.destination);
+  const bus = buses(ctx, master);
+  live = { ctx, master, bus, next: ctx.currentTime + 0.1 };
+  const tick = () => {
+    while (live && live.next < live.ctx.currentTime + 0.5) { scheduleLoop(ctx, bus, live.next); live.next += loopSeconds(); }
+  };
+  tick(); live.timer = setInterval(tick, 100);
+  status(`Playing ${SCORE.bars} bars on loop at ${state.tempo} BPM`);
+}
+function stop() {
+  if (!live) return;
+  clearInterval(live.timer); live.master.disconnect(); live.ctx.close(); live = null;
+  status("Stopped");
+}
+function status(s) { document.getElementById("status").textContent = s; }
+
+// offline render for evals: same code path, returns base64 float32 PCM
+window.renderOffline = async (loops = 1, sr = 44100) => {
+  const ctx = new OfflineAudioContext(1, Math.ceil(loops * loopSeconds() * sr), sr);
+  const bus = buses(ctx, ctx.destination);
+  for (let k = 0; k < loops; k++) scheduleLoop(ctx, bus, k * loopSeconds());
+  const pcm = (await ctx.startRendering()).getChannelData(0);
+  const bytes = new Uint8Array(pcm.buffer); let s = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+
+// UI
+document.getElementById("info").textContent =
+  `${SCORE.bars} bars of ${SCORE.time_signature} at ${SCORE.tempo} BPM, recreated from ${SCORE.source}`;
+const tempo = document.getElementById("tempo");
+tempo.value = state.tempo;
+tempo.onchange = () => { const v = +tempo.value; if (v >= 40 && v <= 240) state.tempo = v; };
+document.getElementById("play").onclick = play;
+document.getElementById("stop").onclick = stop;
+const mixer = document.getElementById("mixer");
+SCORE.tracks.forEach((t, i) => {
+  const row = document.createElement("div"); row.className = "track";
+  row.innerHTML = `<div><strong>${t.name}</strong><small>${t.notes.length} notes</small></div>
+    <label><input type="checkbox" ${t.mute ? "checked" : ""}> mute</label>
+    <input type="range" min="0" max="1.5" step="0.01" value="${t.gain}" aria-label="${t.name} level">`;
+  const [m, g] = row.querySelectorAll("input");
+  const apply = () => { state.tracks[i].mute = m.checked; state.tracks[i].gain = +g.value;
+    if (live) live.bus[i].gain.value = m.checked ? 0 : +g.value; };
+  m.onchange = apply; g.oninput = apply;
+  mixer.appendChild(row);
+});
+</script>
+</body>
+</html>

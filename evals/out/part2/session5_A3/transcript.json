@@ -1,0 +1,27 @@
+[
+ {
+  "user": "Cut beat 0 to beat 8.",
+  "action": "edit",
+  "ok": true,
+  "ops": [
+   {
+    "op": "remove",
+    "range": {
+     "unit": "beat",
+     "anchor": "absolute",
+     "start": 0,
+     "end": 8,
+     "count": null
+    }
+   }
+  ],
+  "reply": "Reading: I will remove beat 0 to beat 8.\n- Removed from beat 0 up to beat 8 (8 beats, bar 1.1 → bar 3.1), 0.384 s → 5.130 s (4.746 s).\n- Track is now 1:58.053 long (-4.746 s vs original), 190 beats, 48 bars."
+ },
+ {
+  "user": "Delete bars 200–210.",
+  "action": "reject",
+  "ok": false,
+  "ops": [],
+  "reply": "The track only has 48 bars. Please choose a range within bars 1 to 48."
+ }
+]

@@ -1,0 +1,371 @@
+{
+ "part1": [
+  {
+   "clip": "A1",
+   "tempo": 124.0,
+   "ts": "4/4",
+   "constant": true,
+   "confidence": 0.965,
+   "seconds": 7.08,
+   "duration": 362.4,
+   "beat_f": 0.9993284083277367,
+   "amlt": 0.9986577181208054,
+   "down_f": 0.9973190348525469,
+   "err_med_ms": 0.28443435903113823,
+   "err_max_ms": 0.40768162619997383,
+   "unmatched_ref": 0
+  },
+  {
+   "clip": "A2",
+   "tempo": 176.0,
+   "ts": "4/4",
+   "constant": true,
+   "confidence": 1.0,
+   "seconds": 1.57,
+   "duration": 89.5,
+   "beat_f": 0.6666666666666666,
+   "amlt": 0.99609375,
+   "down_f": 0.6666666666666666,
+   "err_med_ms": 0.7929042794785346,
+   "err_max_ms": 0.893020419084678,
+   "unmatched_ref": 0
+  },
+  {
+   "clip": "A3",
+   "tempo": 100.349,
+   "ts": "4/4",
+   "constant": false,
+   "confidence": 0.589,
+   "seconds": 1.97,
+   "duration": 122.8,
+   "beat_f": 0.9447236180904524,
+   "amlt": 0.94,
+   "down_f": null,
+   "err_med_ms": 4.445548151048584,
+   "err_max_ms": 61.16999999999706,
+   "unmatched_ref": 12
+  },
+  {
+   "clip": "A4",
+   "tempo": 120.0,
+   "ts": "4/4",
+   "constant": true,
+   "confidence": 0.996,
+   "seconds": 1.68,
+   "duration": 111.0,
+   "beat_f": 0.9922480620155039,
+   "amlt": 0.9846153846153847,
+   "down_f": 0.9696969696969697,
+   "err_med_ms": 0.7271123118357536,
+   "err_max_ms": 0.8229345405510458,
+   "unmatched_ref": 0
+  },
+  {
+   "clip": "A5",
+   "tempo": 120.0,
+   "ts": "4/4",
+   "constant": false,
+   "confidence": 0.996,
+   "seconds": 2.03,
+   "duration": 124.3,
+   "beat_f": 1.0,
+   "amlt": 1.0,
+   "down_f": 1.0,
+   "err_med_ms": 0.12979549019026537,
+   "err_max_ms": 0.39612980776837503,
+   "unmatched_ref": 0
+  },
+  {
+   "clip": "A6",
+   "tempo": 70.0,
+   "ts": "6/8",
+   "constant": true,
+   "confidence": 1.0,
+   "seconds": 1.23,
+   "duration": 64.0,
+   "beat_f": 1.0,
+   "amlt": 1.0,
+   "down_f": 1.0,
+   "err_med_ms": 0.8744639750535299,
+   "err_max_ms": 0.8988285004548069,
+   "unmatched_ref": 0
+  },
+  {
+   "clip": "A7",
+   "tempo": 127.999,
+   "ts": "4/4",
+   "constant": true,
+   "confidence": 1.0,
+   "seconds": 2.44,
+   "duration": 152.8,
+   "beat_f": 0.9984399375975038,
+   "amlt": 0.9968847352024922,
+   "down_f": 0.9937888198757764,
+   "err_med_ms": 0.3012583441801553,
+   "err_max_ms": 0.6525806469180884,
+   "unmatched_ref": 0
+  }
+ ],
+ "sync": {
+  "a_bpm": 124.0,
+  "b_bpm": 127.999,
+  "stretch_ratio": 0.968755,
+  "a_start_bar": 33,
+  "a_start_time": 62.3053,
+  "b_bar1_time": 0.8093,
+  "offset_seconds": 61.4708,
+  "rubberband_latency_ms": -0.97,
+  "note": "offset = where B's (stretched) t=0 sits on A's timeline; B's bar 1 lands on A's bar 33",
+  "files": {
+   "mix": "C:\\Users\\ChaitanyaAnand\\Documents\\GitHub\\soundverse\\evals\\out\\part1\\sync_A7_to_A1\\sync_mix.wav",
+   "a": "C:\\Users\\ChaitanyaAnand\\Documents\\GitHub\\soundverse\\evals\\out\\part1\\sync_A7_to_A1\\sync_a.wav",
+   "b": "C:\\Users\\ChaitanyaAnand\\Documents\\GitHub\\soundverse\\evals\\out\\part1\\sync_A7_to_A1\\sync_b.wav"
+  },
+  "kicks_a": 124,
+  "kicks_b": 124,
+  "kicks_matched": 124,
+  "kick_offset_median_ms": 0.2947845804994742,
+  "kick_offset_max_ms": 0.6802721088435826
+ },
+ "part2": [
+  {
+   "session": "1",
+   "clip": "A1",
+   "turns": [
+    {
+     "user": "Cut beat 16–32 and repeat it twice.",
+     "action": "edit",
+     "ok": true,
+     "ops": [
+      {
+       "op": "repeat",
+       "range": {
+        "unit": "beat",
+        "anchor": "absolute",
+        "start": 16,
+        "end": 32,
+        "count": null
+       },
+       "total_plays": 2
+      }
+     ],
+     "reply": "Reading: Cut beat 16-32 and repeat it twice.\n- Repeated from beat 16 up to beat 32 (16 beats, bar 5.1 → bar 9.1), 8.112 s → 15.854 s (7.742 s): it now plays 2 times in a row, then the track continues.\n- Track is now 6:10.112 long (+7.742 s vs original), 761 beats, 191 bars."
+    },
+    {
+     "user": "Now fade out the last 8 beats.",
+     "action": "edit",
+     "ok": true,
+     "ops": [
+      {
+       "op": "fade",
+       "range": {
+        "unit": "beat",
+        "anchor": "last",
+        "start": null,
+        "end": null,
+        "count": 8
+       },
+       "direction": "out"
+      }
+     ],
+     "reply": "Reading: Fade out the last 8 beats.\n- Fade out over from beat 753 up to the end of the track (8 beats, bar 189.2 → end of track), 364.724 s → 370.112 s (5.388 s).\n- Track is now 6:10.112 long (+7.742 s vs original), 761 beats, 191 bars."
+    },
+    {
+     "user": "Undo.",
+     "action": "undo",
+     "ok": true,
+     "ops": [],
+     "reply": "Undid: Fade out over from beat 753 up to the end of the track (8 beats, bar 189.2 → end of track), 364.724 s → 370.112 s (5.388 s).\nTrack is now 6:10.112 long (+7.742 s vs original), 761 beats, 191 bars."
+    },
+    {
+     "user": "Remove bar 5.",
+     "action": "edit",
+     "ok": true,
+     "ops": [
+      {
+       "op": "remove",
+       "range": {
+        "unit": "bar",
+        "anchor": "absolute",
+        "start": 5,
+        "end": 5,
+        "count": null
+       }
+      }
+     ],
+     "reply": "Reading: Remove bar 5.\n- Removed from beat 16 up to beat 20 (4 beats, bar 5.1 → bar 6.1), 8.112 s → 10.047 s (1.935 s).\n- Track is now 6:08.176 long (+5.806 s vs original), 757 beats, 190 bars."
+    }
+   ],
+   "edits_applied": 2,
+   "sample_rate_kept": true,
+   "format": "WAV/PCM_16 -> WAV/PCM_16",
+   "grid_vs_reanalysis_f": 1.0,
+   "grid_vs_reanalysis_median_ms": 0.029813439937242947
+  },
+  {
+   "session": "2",
+   "clip": "A2",
+   "turns": [
+    {
+     "user": "Loop the first 4 bars four times, then let the track play on.",
+     "action": "edit",
+     "ok": true,
+     "ops": [
+      {
+       "op": "repeat",
+       "range": {
+        "unit": "bar",
+        "anchor": "first",
+        "start": null,
+        "end": null,
+        "count": 4
+       },
+       "total_plays": 4
+      }
+     ],
+     "reply": "Reading: Loop the first 4 bars four times, then let the track play on.\n- Repeated from beat 0 up to beat 16 (16 beats, bar 1.1 → bar 5.1), 0.251 s → 5.705 s (5.455 s): it now plays 4 times in a row, then the track continues.\n- Track is now 1:45.886 long (+16.364 s vs original), 304 beats, 76 bars."
+    }
+   ],
+   "edits_applied": 1,
+   "sample_rate_kept": true,
+   "format": "FLAC/PCM_24 -> FLAC/PCM_24",
+   "grid_vs_reanalysis_f": 1.0,
+   "grid_vs_reanalysis_median_ms": 0.03429541771282629
+  },
+  {
+   "session": "3",
+   "clip": "A5",
+   "turns": [
+    {
+     "user": "Repeat the last bar before the tempo change twice.",
+     "action": "edit",
+     "ok": true,
+     "ops": [
+      {
+       "op": "repeat",
+       "range": {
+        "unit": "bar",
+        "anchor": "before_tempo_change",
+        "start": null,
+        "end": null,
+        "count": 1
+       },
+       "total_plays": 2
+      }
+     ],
+     "reply": "Reading: I will repeat the last bar before the tempo change twice.\n- Repeated from beat 124 up to beat 128 (4 beats, bar 32.1 → bar 33.1), 62.100 s → 64.100 s (2.000 s): it now plays 2 times in a row, then the track continues.\n- Track is now 2:06.282 long (+2.000 s vs original), 260 beats, 65 bars."
+    }
+   ],
+   "edits_applied": 1,
+   "sample_rate_kept": true,
+   "format": "WAV/PCM_16 -> WAV/PCM_16",
+   "grid_vs_reanalysis_f": 1.0,
+   "grid_vs_reanalysis_median_ms": 0.10022799585307496
+  },
+  {
+   "session": "4",
+   "clip": "A1",
+   "turns": [
+    {
+     "user": "Chop out the boring part.",
+     "action": "clarify",
+     "ok": true,
+     "ops": [],
+     "reply": "Which part is boring? For example, we could remove bars 97-112 where the energy drops, or another range. Please specify the bars or beats you want to remove."
+    }
+   ],
+   "edits_applied": 0,
+   "sample_rate_kept": true,
+   "format": "WAV/PCM_16 -> WAV/PCM_16"
+  },
+  {
+   "session": "5",
+   "clip": "A3",
+   "turns": [
+    {
+     "user": "Cut beat 0 to beat 8.",
+     "action": "edit",
+     "ok": true,
+     "ops": [
+      {
+       "op": "remove",
+       "range": {
+        "unit": "beat",
+        "anchor": "absolute",
+        "start": 0,
+        "end": 8,
+        "count": null
+       }
+      }
+     ],
+     "reply": "Reading: I will remove beat 0 to beat 8.\n- Removed from beat 0 up to beat 8 (8 beats, bar 1.1 → bar 3.1), 0.384 s → 5.130 s (4.746 s).\n- Track is now 1:58.053 long (-4.746 s vs original), 190 beats, 48 bars."
+    },
+    {
+     "user": "Delete bars 200–210.",
+     "action": "reject",
+     "ok": false,
+     "ops": [],
+     "reply": "The track only has 48 bars. Please choose a range within bars 1 to 48."
+    }
+   ],
+   "edits_applied": 1,
+   "sample_rate_kept": true,
+   "format": "MP3/MPEG_LAYER_III -> WAV/PCM_16",
+   "grid_vs_reanalysis_f": 0.917098445595855,
+   "grid_vs_reanalysis_median_ms": 0.9365079365082352
+  }
+ ],
+ "part3": [
+  {
+   "clip": "P1",
+   "tempo": 100.0,
+   "bars": 2,
+   "network_requests": 0,
+   "tracks": "drums 22, bass 4",
+   "note_f": 0.64,
+   "note_p": 0.6153846153846154,
+   "note_r": 0.6666666666666666,
+   "kick_f": 0.8,
+   "snare_f": 0.6666666666666666,
+   "hat_f": 0.6666666666666666,
+   "render_onset_f": 0.8571428571428572,
+   "render_onset_median_ms": 0.0
+  },
+  {
+   "clip": "P2",
+   "tempo": 109.9999,
+   "bars": 4,
+   "network_requests": 0,
+   "tracks": "drums 89, bass 36, keys 1",
+   "note_f": 0.628099173553719,
+   "note_p": 0.6031746031746031,
+   "note_r": 0.6551724137931034,
+   "kick_f": 0.7499999999999999,
+   "snare_f": 0.326530612244898,
+   "hat_f": 0.6086956521739131,
+   "render_onset_f": 0.9911504424778761,
+   "render_onset_median_ms": 0.0
+  },
+  {
+   "clip": "P3",
+   "tempo": 90.0,
+   "bars": 8,
+   "network_requests": 0,
+   "tracks": "bass 4, keys 107",
+   "note_f": 0.837696335078534,
+   "note_p": 0.7207207207207207,
+   "note_r": 1.0,
+   "render_onset_f": 0.8837209302325582,
+   "render_onset_median_ms": 5.804988662131194
+  },
+  {
+   "clip": "P4",
+   "tempo": 120.0,
+   "bars": 8,
+   "network_requests": 0,
+   "tracks": "drums 163, bass 108, keys 133",
+   "render_onset_f": 0.9377593360995851,
+   "render_onset_median_ms": 0.0
+  }
+ ]
+}

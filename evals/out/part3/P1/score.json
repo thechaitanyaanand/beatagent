@@ -1,0 +1,192 @@
+{
+ "tempo": 100.0,
+ "time_signature": "4/4",
+ "bars": 2,
+ "loop_beats": 8,
+ "beats_per_bar": 4,
+ "source": "P1.wav",
+ "note_units": "start and duration are in beats from the loop start; pitch is MIDI; drums use GM (36 kick, 38 snare, 42 hat)",
+ "perc_to_harm_ratio": 0.91,
+ "tracks": [
+  {
+   "name": "drums",
+   "kind": "drums",
+   "gain": 1.0,
+   "mute": false,
+   "synth": {},
+   "notes": [
+    {
+     "start": 0.0048,
+     "duration": 0.25,
+     "pitch": 36,
+     "velocity": 0.778
+    },
+    {
+     "start": 0.0048,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 0.421
+    },
+    {
+     "start": 0.4983,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 0.671
+    },
+    {
+     "start": 0.9965,
+     "duration": 0.25,
+     "pitch": 36,
+     "velocity": 0.443
+    },
+    {
+     "start": 1.0014,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 0.802
+    },
+    {
+     "start": 1.4996,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 0.73
+    },
+    {
+     "start": 1.9979,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 0.668
+    },
+    {
+     "start": 2.4961,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 0.996
+    },
+    {
+     "start": 2.501,
+     "duration": 0.25,
+     "pitch": 36,
+     "velocity": 0.841
+    },
+    {
+     "start": 2.9992,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 0.805
+    },
+    {
+     "start": 3.4975,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 0.623
+    },
+    {
+     "start": 3.9958,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 1.0
+    },
+    {
+     "start": 4.0006,
+     "duration": 0.25,
+     "pitch": 36,
+     "velocity": 1.0
+    },
+    {
+     "start": 4.4989,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 0.588
+    },
+    {
+     "start": 4.9971,
+     "duration": 0.25,
+     "pitch": 36,
+     "velocity": 0.464
+    },
+    {
+     "start": 5.002,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 0.741
+    },
+    {
+     "start": 5.5002,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 0.578
+    },
+    {
+     "start": 5.9985,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 1.0
+    },
+    {
+     "start": 6.4967,
+     "duration": 0.25,
+     "pitch": 36,
+     "velocity": 0.878
+    },
+    {
+     "start": 6.4967,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 0.995
+    },
+    {
+     "start": 6.9998,
+     "duration": 0.25,
+     "pitch": 38,
+     "velocity": 0.725
+    },
+    {
+     "start": 7.4981,
+     "duration": 0.25,
+     "pitch": 42,
+     "velocity": 0.675
+    }
+   ]
+  },
+  {
+   "name": "bass",
+   "kind": "bass",
+   "gain": 0.8,
+   "mute": false,
+   "synth": {
+    "wave": "sawtooth",
+    "cutoff": 200,
+    "q": 6,
+    "attack": 0.005,
+    "release": 0.06
+   },
+   "notes": [
+    {
+     "start": 0.387,
+     "duration": 0.4257,
+     "pitch": 30,
+     "velocity": 0.545
+    },
+    {
+     "start": 4.1237,
+     "duration": 0.6966,
+     "pitch": 30,
+     "velocity": 0.53
+    },
+    {
+     "start": 6.4457,
+     "duration": 0.2537,
+     "pitch": 40,
+     "velocity": 0.57
+    },
+    {
+     "start": 6.4457,
+     "duration": 1.0083,
+     "pitch": 30,
+     "velocity": 0.537
+    }
+   ]
+  }
+ ]
+}

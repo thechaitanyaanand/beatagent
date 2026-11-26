@@ -1,0 +1,132 @@
+{
+ "2a78fd428cdc02d8": {
+  "action": "edit",
+  "reading": "Cut beat 16-32 and repeat it twice.",
+  "message": "",
+  "ops": [
+   {
+    "op": "repeat",
+    "range": {
+     "unit": "beat",
+     "anchor": "absolute",
+     "start": 16,
+     "end": 32,
+     "count": null
+    },
+    "db": null,
+    "direction": null,
+    "to": null,
+    "total_plays": 2
+   }
+  ]
+ },
+ "a2be138b105033cc": {
+  "action": "edit",
+  "reading": "Fade out the last 8 beats.",
+  "message": "",
+  "ops": [
+   {
+    "op": "fade",
+    "range": {
+     "unit": "beat",
+     "anchor": "last",
+     "start": null,
+     "end": null,
+     "count": 8
+    },
+    "db": null,
+    "direction": "out",
+    "to": null,
+    "total_plays": null
+   }
+  ]
+ },
+ "168cf1c2f0b2791b": {
+  "action": "undo",
+  "reading": "Undo the last action.",
+  "message": "",
+  "ops": []
+ },
+ "e4f51589c413867d": {
+  "action": "edit",
+  "reading": "Remove bar 5.",
+  "message": "",
+  "ops": [
+   {
+    "op": "remove",
+    "range": {
+     "unit": "bar",
+     "anchor": "absolute",
+     "start": 5,
+     "end": 5,
+     "count": null
+    }
+   }
+  ]
+ },
+ "3aa77f5c377d0905": {
+  "action": "edit",
+  "reading": "Loop the first 4 bars four times, then let the track play on.",
+  "message": "",
+  "ops": [
+   {
+    "op": "repeat",
+    "range": {
+     "unit": "bar",
+     "anchor": "first",
+     "start": null,
+     "end": null,
+     "count": 4
+    },
+    "total_plays": 4
+   }
+  ]
+ },
+ "c284ffe0a25de70a": {
+  "action": "edit",
+  "reading": "I will repeat the last bar before the tempo change twice.",
+  "message": "",
+  "ops": [
+   {
+    "op": "repeat",
+    "range": {
+     "unit": "bar",
+     "anchor": "before_tempo_change",
+     "start": null,
+     "end": null,
+     "count": 1
+    },
+    "total_plays": 2
+   }
+  ]
+ },
+ "9caacb30f9f80869": {
+  "action": "clarify",
+  "reading": "You asked to chop out the boring part.",
+  "message": "Which part is boring? For example, we could remove bars 97-112 where the energy drops, or another range. Please specify the bars or beats you want to remove.",
+  "ops": []
+ },
+ "94261ab378191b98": {
+  "action": "edit",
+  "reading": "I will remove beat 0 to beat 8.",
+  "message": "",
+  "ops": [
+   {
+    "op": "remove",
+    "range": {
+     "unit": "beat",
+     "anchor": "absolute",
+     "start": 0,
+     "end": 8,
+     "count": null
+    }
+   }
+  ]
+ },
+ "4df4dde48f618809": {
+  "action": "reject",
+  "reading": "I cannot delete bars 200 to 210 because the track only has 48 bars.",
+  "message": "The track only has 48 bars. Please choose a range within bars 1 to 48.",
+  "ops": []
+ }
+}
