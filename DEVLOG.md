@@ -64,3 +64,56 @@ Numbers quoted are from the run at that moment; final numbers are in `evals/resu
   (measured across 7 option combos). Short window: max 0.34 ms. Trade-off: slightly rougher
   sustained tones, which is fine for beat-matching.
 - Result on A7→A1 from bar 33: median kick offset 0.29 ms, max 0.68 ms.
+
+## Part 2 — chat editing
+
+- **Ops are typed (pydantic) and addressed in beats/bars only**: remove, keep, repeat, move,
+  insert, fade, gain. A range is `{unit, anchor, start, end, count}` where anchor is absolute,
+  first, last, before_tempo_change or all. The LLM fills that in; it never sees or computes seconds.
+- **Range conventions**: beat ranges are half-open positions ("beats 16–32" = 16 beats, 4 bars),
+  bar ranges are inclusive ("bars 5–8" = 4 bars). These are the readings a DJ would expect, and
+  every echo states the exact beats, bars and seconds so a wrong reading is visible.
+- **"Repeat it twice" = plays twice in total.** Genuinely ambiguous (could be 3 plays). Chosen
+  so "repeat twice" and "loop four times" follow one rule: the number is the total. Echo says
+  "it now plays 2 times in a row".
+- **"Cut X" alone = remove; "cut X and repeat it" = take X and repeat in place.**
+- **"Beat 0" means the user counts from zero**: "beat 0 to beat 8" = our beats 1–9 (8 beats).
+  The agent says so in its reading.
+- **All numbers in one message refer to the track before that message.** "Remove bar 2 and bar 5"
+  removes the bars the user saw, not the bar that became 5. Implemented by tagging every beat
+  with where it came from and following it through each step.
+- **Edits re-render from the original on undo/redo**, nothing is destructive.
+  History is a list of turns plus a pointer.
+- **The grid is carried through the splice**, not re-analysed: each beat goes wherever its sample
+  went. So the exported grid always matches the edited audio exactly.
+- **Splices cut on the beat sample and crossfade in the 8 ms *before* it**, so the beat's attack
+  is untouched. First version used equal-power; the test caught a +3 dB bump, because both sides
+  of a beat-aligned splice are usually the same loop (correlated). Switched to equal-gain with a
+  raised-cosine shape (no corners). The test was also wrong at first: its 220 Hz tone happened to
+  be phase-aligned across the cut, so even a hard cut passed. Changed to 221 Hz and verified that
+  a hard cut now fails the test.
+- **Output keeps sample rate and bit depth.** MP3 input becomes 16-bit WAV (re-encoding would add
+  loss and encoder delay).
+- **Fades go to/from silence**; a fade-out in the middle silences what follows, and the echo says so.
+- **Errors are replies, not crashes**: out-of-range bars, no tempo change on a constant track,
+  moving a range into itself, an edit that leaves no audio. Nothing changes when refused.
+
+## Part 2 — the LLM
+
+- **Gemini, called over plain HTTPS with a JSON response schema** (no SDK; one POST). The user
+  supplied a Gemini key. Key read from env or `.env`; the provided `.env` spells it
+  `GEMINI-API-KEY`, which isn't a valid env var name, so the loader accepts both.
+- **Model: `gemini-3.5-flash-lite`.** Full Flash models returned 503 "high demand" for minutes
+  and Pro is over quota on this key. Lite answers in ~2 s. Configurable via `BEAT_AGENT_MODEL`.
+  Retries with backoff on 429/5xx and timeouts.
+- **The model kept dropping the end of "beat 16–32"** and repeated a single beat. The echo made
+  it obvious. Two fixes: (1) every range field is required-but-nullable in the schema, plus three
+  worked examples in the prompt; (2) a code check: every "X–Y" the user typed must appear in the
+  ops, else the model gets one retry with a note, else we refuse and ask. A wrong edit is never
+  applied silently.
+- **Vague requests get a measured suggestion.** The prompt includes a per-4-bar table of level and
+  low-end energy (computed by code). "Chop out the boring part" → "Did you mean bars 97–112
+  (low end −5 dB)?", which is exactly A1's breakdown. It asks; it doesn't cut.
+- **Out-of-scope requests are refused with what we can do instead** ("make the vocals louder").
+- **LLM replies are cached by prompt hash** (`BEAT_AGENT_CACHE`), so evals replay at zero cost and
+  identically; a reviewer can delete the cache to run live.
