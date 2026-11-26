@@ -117,3 +117,28 @@ Numbers quoted are from the run at that moment; final numbers are in `evals/resu
 - **Out-of-scope requests are refused with what we can do instead** ("make the vocals louder").
 - **LLM replies are cached by prompt hash** (`BEAT_AGENT_CACHE`), so evals replay at zero cost and
   identically; a reviewer can delete the cache to run live.
+
+## Part 3 — audio to Web Audio
+
+- **The LLM does not write JavaScript.** The page is a fixed template (`beatagent/player.html`)
+  that reads a score JSON. Generated code running in a user's browser could do anything
+  (network calls, exfiltration, infinite loops); data can't. It also keeps analysis and playback
+  decoupled: the score is the interface.
+- **Score times are in beats**, so "play it at 140" is a tempo change, not a re-transcription.
+- **Tempo of a loop comes from its length**: an N-bar loop is exactly 60·beats·N/duration BPM.
+  The tracker's estimate is only used to pick N. P1's first run came out as 4 bars at 100 BPM
+  (the 2-bar clip was too short for the beats-per-bar vote); now 4/4 unless 3/4 or compound
+  was measured.
+- **HPSS splits drums from pitched parts**; Demucs would be better on real mixes but is a heavy
+  install for a 2–16 bar loop. Noted as the first upgrade.
+- **Drums: peaks picked per band** (low = kick, mid = snare, high = hat). First version used one
+  onset list and labelled each onset; quiet hats under kicks vanished (hat F = 0). Then hats were
+  still lost because the bright snare set the high band's scale; now hats are judged only against
+  non-snare high peaks (P1 hat F 0 → 0.72).
+- **Pitched: Basic Pitch on the harmonic layer**, split into bass (< E3) and keys by register.
+  Minimum note length 120 ms, because kick bleed showed up as short bass notes.
+- **No drums when the percussive layer is weak** (percussive/harmonic RMS < 0.35): piano attacks
+  were becoming a fake drum track on P3 (note F 0.76 → 0.84).
+- **Seeded noise in the page**, so offline renders are identical run to run.
+- **Offline render** runs the page's own scheduler in an `OfflineAudioContext` in headless
+  Chromium (Playwright), and records any network request the page makes (expected: none).
